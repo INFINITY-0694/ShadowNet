@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - ShadowNet</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body class="theme-dark">
+
+<!-- Password Verification Modal -->
+<div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-lock" style="color: #fbbf24;"></i> Admin Authentication Required
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Enter your password to access admin settings</p>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="verifyPassword" 
+                           placeholder="Enter your password" autofocus>
+                </div>
+                <div id="verifyError" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="button" class="btn btn-primary" id="verifyBtn">
+                    <i class="fas fa-check"></i> Verify
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4" id="settingsContent" style="display: none;">
+
+    <!-- Header with Navigation -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="fas fa-cog text-primary"></i> Settings</h2>
+                    <small class="text-muted">Admin Configuration</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="/admin-panel" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </a>
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card border-primary">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-user-cog text-primary"></i> Account Settings</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Change Password</h5>
+                            <p class="text-muted">Update your admin password</p>
+                            <div class="mb-3">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" placeholder="Enter current password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+                            </div>
+                            <button id="changePasswordBtn" class="btn btn-primary">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Management -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card border-warning">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-database text-warning"></i> Database Management</h4>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Warning:</strong> These actions are irreversible!
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h5>Clear Events Only</h5>
+                            <p class="text-muted">Remove all event logs (keeps agents, tasks, incidents)</p>
+                            <button id="clearEventsBtn" class="btn btn-warning">
+                                <i class="fas fa-eraser"></i> Clear Events
+                            </button>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <h5>Clear Completed Tasks</h5>
+                            <p class="text-muted">Remove all completed tasks (keeps pending/running)</p>
+                            <button id="clearTasksBtn" class="btn btn-warning">
+                                <i class="fas fa-tasks"></i> Clear Completed Tasks
+                            </button>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <h5>Reset Database</h5>
+                            <p class="text-muted text-danger">⚠️ Delete ALL data (agents, tasks, events, incidents)</p>
+                            <button id="resetDbBtn" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Reset Database
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Access Control -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card border-info">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-shield-alt text-info"></i> Access Control</h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">IP Whitelist Mode</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enableWhitelist">
+                            <label class="form-check-label" for="enableWhitelist">
+                                Enable IP Whitelist (Only allow listed IPs)
+                            </label>
+                        </div>
+                        <small class="text-muted">When disabled, all IPs can access the dashboard</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Allowed IP Addresses</label>
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" id="newIpInput" 
+                                   placeholder="Enter IP address (e.g., 192.168.1.100)">
+                            <button class="btn btn-primary" id="addIpBtn">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Use 0.0.0.0/0 to allow all, or specific IPs/ranges
+                        </small>
+                    </div>
+                    
+                    <div id="ipListContainer">
+                        <h5 class="mt-3">Current Whitelist</h5>
+                        <ul class="list-group" id="ipList">
+                            <!-- IP list will be populated here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-info-circle text-success"></i> System Information</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Database Size:</strong> <span id="dbSize">Loading...</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Total Agents:</strong> <span id="totalAgents">Loading...</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Total Events:</strong> <span id="totalEvents">Loading...</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Password Verification on Page Load
+let isVerified = false;
+const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+
+document.getElementById('verifyBtn').addEventListener('click', verifyPassword);
+document.getElementById('verifyPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') verifyPassword();
+});
+
+async function verifyPassword() {
+    const password = document.getElementById('verifyPassword').value;
+    const errorDiv = document.getElementById('verifyError');
+    
+    if (!password) {
+        errorDiv.textContent = 'Please enter your password';
+        errorDiv.classList.remove('d-none');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/admin/verify-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.verified) {
+            isVerified = true;
+            passwordModal.hide();
+            document.getElementById('settingsContent').style.display = 'block';
+            loadTheme();
+            loadAccessControl();
+            loadSystemInfo();
+        } else {
+            errorDiv.textContent = data.error || 'Invalid password';
+            errorDiv.classList.remove('d-none');
+            document.getElementById('verifyPassword').value = '';
+            document.getElementById('verifyPassword').focus();
+        }
+    } catch (error) {
+        errorDiv.textContent = 'Verification failed. Please try again.';
+        errorDiv.classList.remove('d-none');
+    }
+}
+
+// Show password modal on page load
+document.addEventListener('DOMContentLoaded', () => {
+    passwordModal.show();
+});
+
+// Theme Management - Dark theme only
+function loadTheme() {
+    // Always use dark theme
+    document.body.classList.add('theme-dark');
+    localStorage.setItem('shadownet-theme', 'dark');
+}
+
+// Password Change
+document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('Please fill all password fields', 'warning');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'danger');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('Password changed successfully', 'success');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        } else {
+            showToast('Error: ' + (data.error || 'Failed to change password'), 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to change password', 'danger');
+    }
+});
+
+// Database Management
+document.getElementById('clearEventsBtn').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to clear all events? This cannot be undone.')) return;
+    
+    // Additional password verification for destructive operation
+    const password = prompt('Enter your password to confirm:');
+    if (!password) return;
+    
+    try {
+        // Verify password first
+        const verifyResponse = await fetch('/api/admin/verify-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        if (!verifyResponse.ok) {
+            showToast('Invalid password', 'danger');
+            return;
+        }
+        
+        const response = await fetch('/api/admin/clear-events', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('Events cleared successfully', 'success');
+            loadSystemInfo();
+        } else {
+            showToast('Error: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to clear events', 'danger');
+    }
+});
+
+document.getElementById('clearTasksBtn').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to clear completed tasks? This cannot be undone.')) return;
+    
+    // Additional password verification for destructive operation
+    const password = prompt('Enter your password to confirm:');
+    if (!password) return;
+    
+    try {
+        // Verify password first
+        const verifyResponse = await fetch('/api/admin/verify-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        if (!verifyResponse.ok) {
+            showToast('Invalid password', 'danger');
+            return;
+        }
+        
+        const response = await fetch('/api/admin/clear-tasks', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('Completed tasks cleared successfully', 'success');
+            loadSystemInfo();
+        } else {
+            showToast('Error: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to clear tasks', 'danger');
+    }
+});
+
+document.getElementById('resetDbBtn').addEventListener('click', async () => {
+    const confirmation = prompt('Type "RESET" to confirm database reset:');
+    if (confirmation !== 'RESET') {
+        showToast('Reset cancelled', 'info');
+        return;
+    }
+    
+    // Additional password verification for destructive operation
+    const password = prompt('Enter your password to confirm:');
+    if (!password) return;
+    
+    try {
+        // Verify password first
+        const verifyResponse = await fetch('/api/admin/verify-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        if (!verifyResponse.ok) {
+            showToast('Invalid password', 'danger');
+            return;
+        }
+        
+        const response = await fetch('/api/admin/reset-database', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('Database reset successfully', 'success');
+            setTimeout(() => window.location.href = '/', 2000);
+        } else {
+            showToast('Error: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to reset database', 'danger');
+    }
+});
+
+// Access Control
+async function loadAccessControl() {
+    try {
+        const response = await fetch('/api/admin/access-control');
+        const data = await response.json();
+        
+        document.getElementById('enableWhitelist').checked = data.enabled;
+        renderIPList(data.whitelist || []);
+    } catch (error) {
+        console.error('Failed to load access control:', error);
+    }
+}
+
+function renderIPList(ips) {
+    const list = document.getElementById('ipList');
+    list.innerHTML = '';
+    
+    if (ips.length === 0) {
+        list.innerHTML = '<li class="list-group-item bg-dark text-light">No IPs in whitelist</li>';
+        return;
+    }
+    
+    ips.forEach(ip => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item bg-dark text-light d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+            <span><i class="fas fa-network-wired"></i> ${ip}</span>
+            <button class="btn btn-sm btn-danger" onclick="removeIP('${ip}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+document.getElementById('enableWhitelist').addEventListener('change', async (e) => {
+    try {
+        const response = await fetch('/api/admin/access-control', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: e.target.checked })
+        });
+        
+        if (response.ok) {
+            showToast('Whitelist ' + (e.target.checked ? 'enabled' : 'disabled'), 'success');
+        } else {
+            showToast('Failed to update whitelist', 'danger');
+            e.target.checked = !e.target.checked;
+        }
+    } catch (error) {
+        showToast('Error updating whitelist', 'danger');
+        e.target.checked = !e.target.checked;
+    }
+});
+
+document.getElementById('addIpBtn').addEventListener('click', async () => {
+    const ip = document.getElementById('newIpInput').value.trim();
+    if (!ip) {
+        showToast('Please enter an IP address', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/admin/access-control/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ip })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('IP added successfully', 'success');
+            document.getElementById('newIpInput').value = '';
+            loadAccessControl();
+        } else {
+            showToast('Error: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to add IP', 'danger');
+    }
+});
+
+async function removeIP(ip) {
+    try {
+        const response = await fetch('/api/admin/access-control/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ip })
+        });
+        
+        if (response.ok) {
+            showToast('IP removed successfully', 'success');
+            loadAccessControl();
+        } else {
+            showToast('Failed to remove IP', 'danger');
+        }
+    } catch (error) {
+        showToast('Failed to remove IP', 'danger');
+    }
+});
+
+// System Information
+async function loadSystemInfo() {
+    try {
+        const response = await fetch('/api/admin/system-info');
+        const data = await response.json();
+        
+        document.getElementById('dbSize').textContent = data.db_size || 'Unknown';
+        document.getElementById('totalAgents').textContent = data.total_agents || 0;
+        document.getElementById('totalEvents').textContent = data.total_events || 0;
+    } catch (error) {
+        console.error('Failed to load system info:', error);
+    }
+}
+
+// Toast Notification
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+    toast.style.zIndex = '9999';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    if (confirm('Are you sure you want to logout?')) {
+        await fetch('/logout', { method: 'POST' });
+        window.location.href = '/login';
+    }
+});
+</script>
+
+</body>
+</html>

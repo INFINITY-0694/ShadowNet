@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowNet Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #3a3a3a;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .login-logo {
+            font-size: 3rem;
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }
+        
+        .login-title {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .login-subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            background: rgba(45, 45, 45, 0.8);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            background: rgba(55, 55, 55, 0.9);
+            border-color: #0d6efd;
+            color: #fff;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: #888;
+        }
+        
+        .form-label {
+            color: #bbb;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(13, 110, 253, 0.4);
+        }
+        
+        .btn-login:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 12px 15px;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .input-group-icon {
+            position: relative;
+        }
+        
+        .input-group-icon .form-control {
+            padding-left: 45px;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">🕶️</div>
+                <h1 class="login-title">ShadowNet</h1>
+                <p class="login-subtitle">Command & Control System</p>
+            </div>
+
+            <div id="errorAlert" class="alert alert-danger" style="display: none;">
+                <strong>Error:</strong> <span id="errorMessage"></span>
+            </div>
+
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group-icon">
+                        <span class="input-icon">👤</span>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               placeholder="Enter username"
+                               required
+                               autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group-icon">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               placeholder="Enter password"
+                               required
+                               autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    <span id="loginBtnText">Login</span>
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                </button>
+            </form>
+
+
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Hide error on input
+        document.getElementById('username').addEventListener('input', hideError);
+        document.getElementById('password').addEventListener('input', hideError);
+
+        function hideError() {
+            errorAlert.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+        }
+
+        function setLoading(loading) {
+            loginBtn.disabled = loading;
+            if (loading) {
+                loginBtnText.textContent = 'Logging in...';
+                loadingSpinner.style.display = 'inline-block';
+            } else {
+                loginBtnText.textContent = 'Login';
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            hideError();
+            setLoading(true);
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            const doFetch = () => fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            try {
+                let response;
+                try {
+                    response = await doFetch();
+                } catch (_) {
+                    // Stale keep-alive connection — retry once with a fresh connection
+                    response = await doFetch();
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    throw new Error('Server returned unexpected response (HTTP ' + response.status + ')');
+                }
+
+                if (response.ok && data.success) {
+                    loginBtnText.textContent = 'Success! Redirecting...';
+                    setTimeout(() => { window.location.href = '/'; }, 500);
+                } else {
+                    setLoading(false);
+                    showError(data.error || 'Login failed. Please try again.');
+                }
+            } catch (error) {
+                setLoading(false);
+                showError('Connection error: ' + error.message);
+                console.error('Login error:', error);
+            }
+        });
+
+        // Auto-focus username field on load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').focus();
+        });
+
+        // Enter key on password field submits form
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

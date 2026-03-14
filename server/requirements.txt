@@ -1,0 +1,25 @@
+# ShadowNet C2 Server Requirements
+# Python 3.11+
+
+# Web Framework
+Flask>=3.1.0
+Werkzeug>=3.1.0
+
+# Cryptography
+cryptography==41.0.7
+
+# Database (SQLite built-in with Python)
+# No additional packages needed for SQLite3
+
+# Authentication
+bcrypt==4.1.2
+
+# Optional: For better development experience
+python-dotenv==1.0.0
+
+# Production WSGI server
+gunicorn==21.2.0
+
+# Testing
+pytest>=7.4
+pytest-flask>=1.3

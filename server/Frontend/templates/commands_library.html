@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Commands Library - ShadowNet</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+    
+    <style>
+        .category-badge {
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        
+        .category-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .category-badge.active {
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+        }
+        
+        .command-card {
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 4px solid #0d6efd;
+            height: 100%;
+        }
+        
+        .command-card:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .command-code {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            font-size: 0.85rem;
+        }
+        
+        .favorite-star {
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .favorite-star:hover {
+            transform: scale(1.3);
+        }
+        
+        .favorite-star.active {
+            color: #ffc107;
+        }
+        
+        .stats-badge {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+
+<div class="container-fluid mt-4">
+
+    <!-- Header with Navigation -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-terminal text-primary"></i> ShadowNet C2
+                    </h2>
+                    <small class="text-muted">Commands Library - Browse and manage command templates</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="row mb-4">
+        <!-- Category Filter -->
+        <div class="col-lg-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-filter text-info"></i> Filter by Category</h5>
+                    <div id="categoryFilters">
+                        <span class="badge bg-primary category-badge active" data-category="all">
+                            All Commands
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OS Filter -->
+        <div class="col-lg-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-desktop text-success"></i> Filter by Operating System</h5>
+                    <div id="osFilters">
+                        <span class="badge bg-primary category-badge active" data-os="all">
+                            All OS
+                        </span>
+                        <span class="badge bg-secondary category-badge" data-os="windows">
+                            <i class="fab fa-windows"></i> Windows
+                        </span>
+                        <span class="badge bg-secondary category-badge" data-os="linux">
+                            <i class="fab fa-linux"></i> Linux
+                        </span>
+                        <span class="badge bg-secondary category-badge" data-os="macos">
+                            <i class="fab fa-apple"></i> macOS
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="input-group">
+                        <span class="input-group-text bg-secondary border-secondary">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" 
+                               id="searchInput" 
+                               class="form-control bg-secondary text-light border-secondary" 
+                               placeholder="Search commands by name, description, or command text...">
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commands Grid -->
+    <div class="row" id="commandsContainer">
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Loading commands...</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Execute Command Modal -->
+<div class="modal fade" id="executeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-play-circle text-primary"></i> Execute Command
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-terminal"></i> Command:</label>
+                    <div class="command-code" id="modalCommand"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-laptop"></i> Select Target Agent:</label>
+                    <select id="modalAgentSelect" class="form-select bg-secondary text-light border-secondary">
+                        <option value="">-- Select Agent --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="modalExecuteBtn">
+                    <i class="fas fa-paper-plane"></i> Execute
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let allCommands = [];
+let allCategories = [];
+let currentCategory = 'all';
+let currentOS = 'all';
+let currentCommand = null;
+
+// =========================
+// Load Data
+// =========================
+
+async function loadCommands() {
+    try {
+        const response = await fetch('/api/commands');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Not logged in or session expired.');
+        }
+        allCommands = await response.json();
+        renderCommands(allCommands);
+    } catch (error) {
+        document.getElementById('commandsContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <strong>Error loading commands:</strong> ${error.message}<br><br>
+                    <a href="/login" class="btn btn-primary">Go to Login</a>
+                    <button onclick="window.location.reload()" class="btn btn-secondary ms-2">Reload</button>
+                </div>
+            </div>`;
+    }
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/commands/categories');
+        if (!response.ok) return;
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) return;
+        allCategories = await response.json();
+        renderCategoryFilters();
+    } catch (error) {
+        console.error('[ERROR] Loading categories:', error);
+    }
+}
+
+async function loadAgents() {
+    try {
+        const response = await fetch('/agents');
+        if (!response.ok) return;
+        const agents = await response.json();
+        const select = document.getElementById('modalAgentSelect');
+        select.innerHTML = '<option value="">-- Select Agent --</option>';
+        agents.forEach(agent => {
+            const option = document.createElement('option');
+            option.value = agent.alias;
+            option.textContent = `${agent.alias} (${agent.status})`;
+            option.disabled = agent.status !== 'alive' && agent.status !== 'online';
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('[ERROR] Loading agents:', error);
+    }
+}
+
+// =========================
+// Render Functions
+// =========================
+
+function renderCategoryFilters() {
+    const container = document.getElementById('categoryFilters');
+    container.innerHTML = `<span class="badge bg-primary category-badge active" data-category="all">All Commands</span>`;
+    allCategories.forEach(category => {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-secondary category-badge';
+        badge.dataset.category = category;
+        badge.textContent = category.replace('_', ' ').toUpperCase();
+        container.appendChild(badge);
+    });
+}
+
+function renderCommands(commands) {
+    const container = document.getElementById('commandsContainer');
+
+    if (commands.length === 0) {
+        container.innerHTML = `<div class="col-12"><div class="alert alert-info">No commands found</div></div>`;
+        return;
+    }
+
+    container.innerHTML = '';
+
+    commands.forEach(cmd => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 mb-3';
+
+        const osBadge = cmd.os_type && cmd.os_type !== 'all'
+            ? `<span class="badge bg-info stats-badge ms-1">${cmd.os_type}</span>`
+            : '';
+
+        const favoriteClass = cmd.is_favorite ? 'active' : '';
+
+        col.innerHTML = `
+            <div class="command-card card bg-dark border-secondary" data-command-id="${cmd.id}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0"><i class="fas fa-code"></i> ${cmd.name}</h6>
+                        <span class="favorite-star ${favoriteClass}" data-id="${cmd.id}">
+                            ${cmd.is_favorite ? '⭐' : '☆'}
+                        </span>
+                    </div>
+                    <p class="card-text text-muted small mb-2">${cmd.description || 'No description'}</p>
+                    <div class="command-code mb-2">${cmd.command}</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-secondary stats-badge">
+                                <i class="fas fa-tag"></i> ${cmd.category}
+                            </span>
+                            ${osBadge}
+                        </div>
+                        <span class="badge bg-info stats-badge">
+                            <i class="fas fa-chart-line"></i> Used ${cmd.usage_count}x
+                        </span>
+                    </div>
+                </div>
+            </div>`;
+
+        container.appendChild(col);
+    });
+
+    addCommandCardListeners();
+    addFavoriteListeners();
+}
+
+function addCommandCardListeners() {
+    document.querySelectorAll('.command-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.classList.contains('favorite-star')) return;
+            const command = allCommands.find(c => c.id == this.dataset.commandId);
+            if (command) openExecuteModal(command);
+        });
+    });
+}
+
+function addFavoriteListeners() {
+    document.querySelectorAll('.favorite-star').forEach(star => {
+        star.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            try {
+                await fetch(`/api/commands/${id}/favorite`, { method: 'POST' });
+                this.classList.toggle('active');
+                this.textContent = this.classList.contains('active') ? '⭐' : '☆';
+            } catch (error) {
+                console.error('[ERROR] Toggling favorite:', error);
+            }
+        });
+    });
+}
+
+// =========================
+// Filter Functions
+// =========================
+
+function filterByCategory(category) {
+    currentCategory = category;
+    document.querySelectorAll('[data-category]').forEach(badge => {
+        const isActive = badge.dataset.category === category;
+        badge.classList.toggle('bg-primary', isActive);
+        badge.classList.toggle('bg-secondary', !isActive);
+        badge.classList.toggle('active', isActive);
+    });
+    applyFilters();
+}
+
+function filterByOS(osType) {
+    currentOS = osType;
+    document.querySelectorAll('[data-os]').forEach(badge => {
+        const isActive = badge.dataset.os === osType;
+        badge.classList.toggle('bg-primary', isActive);
+        badge.classList.toggle('bg-secondary', !isActive);
+        badge.classList.toggle('active', isActive);
+    });
+    applyFilters();
+}
+
+function applyFilters() {
+    let filtered = allCommands;
+    if (currentCategory !== 'all') filtered = filtered.filter(c => c.category === currentCategory);
+    if (currentOS !== 'all') filtered = filtered.filter(c => c.os_type === currentOS || c.os_type === 'all');
+    renderCommands(filtered);
+}
+
+function searchCommands() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allCommands;
+    if (query) {
+        filtered = filtered.filter(cmd =>
+            cmd.name.toLowerCase().includes(query) ||
+            cmd.command.toLowerCase().includes(query) ||
+            (cmd.description && cmd.description.toLowerCase().includes(query))
+        );
+    }
+    if (currentCategory !== 'all') filtered = filtered.filter(c => c.category === currentCategory);
+    if (currentOS !== 'all') filtered = filtered.filter(c => c.os_type === currentOS || c.os_type === 'all');
+    renderCommands(filtered);
+}
+
+// =========================
+// Execute Modal
+// =========================
+
+function openExecuteModal(command) {
+    currentCommand = command;
+    document.getElementById('modalCommand').textContent = command.command;
+    loadAgents();
+    new bootstrap.Modal(document.getElementById('executeModal')).show();
+}
+
+document.getElementById('modalExecuteBtn').addEventListener('click', async function() {
+    const agent = document.getElementById('modalAgentSelect').value;
+    if (!agent) { alert('Please select an agent'); return; }
+    if (!currentCommand) { alert('No command selected'); return; }
+
+    try {
+        const response = await fetch('/api/task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                agent_alias: agent,
+                command: currentCommand.command,
+                template_id: currentCommand.id
+            })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            alert(`Command sent to ${agent} successfully!`);
+            bootstrap.Modal.getInstance(document.getElementById('executeModal')).hide();
+            loadCommands();
+        } else {
+            throw new Error(result.error || 'Failed to execute command');
+        }
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+});
+
+// =========================
+// Event Listeners
+// =========================
+
+document.getElementById('searchBtn').addEventListener('click', searchCommands);
+document.getElementById('searchInput').addEventListener('keyup', e => {
+    if (e.key === 'Enter') searchCommands();
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('category-badge')) {
+        if (e.target.dataset.category) filterByCategory(e.target.dataset.category);
+        if (e.target.dataset.os) filterByOS(e.target.dataset.os);
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    if (confirm('Are you sure you want to logout?')) {
+        await fetch('/logout', { method: 'POST' });
+        window.location.href = '/login';
+    }
+});
+
+// =========================
+// Initialize
+// =========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadCommands();
+    loadCategories();
+    loadAgents();
+});
+</script>
+
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let allCommands = [];
+let allCategories = [];
+let currentCategory = 'all';
+let currentOS = 'all';
+let currentCommand = null;
+
+// =========================
+// Load Data
+// =========================
+
+async function loadCommands() {
+    try {
+        const response = await fetch('/api/commands');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Not logged in or session expired. Please refresh the page.');
+        }
+        
+        allCommands = await response.json();
+        
+        renderCommands(allCommands);
+        
+        console.log('[DEBUG] Loaded commands:', allCommands.length);
+    } catch (error) {
+        console.error('[ERROR] Loading commands:', error);
+        document.getElementById('commandsContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <strong>Error loading commands:</strong> ${error.message}
+                    <br><br>
+                    <a href="/login" class="btn btn-primary">Go to Login</a>
+                    <button onclick="window.location.reload()" class="btn btn-secondary">Reload Page</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/commands/categories');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.warn('Not logged in, skipping categories');
+            return;
+        }
+        
+        allCategories = await response.json();
+        
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.warn('Not logged in, skipping agents');
+            return;
+        }
+        
+        renderCategoryFilters();
+        
+        console.log('[DEBUG] Loaded categories:', allCategories);
+    } catch (error) {
+        console.error('[ERROR] Loading categories:', error);
+    }
+}
+
+async function loadAgents() {
+    try {
+        const response = await fetch('/agents');
+        const agents = await response.json();
+        
+        const select = document.getElementById('modalAgentSelect');
+        select.innerHTML = '<option value="">-- Select Agent --</option>';
+        
+        agents.forEach(agent => {
+            const option = document.createElement('option');
+            option.value = agent.alias;
+            option.textContent = `${agent.alias} (${agent.status})`;
+            option.disabled = agent.status !== 'alive' && agent.status !== 'online';
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('[ERROR] Loading agents:', error);
+    }
+}
+
+// =========================
+// Render Functions
+// =========================
+
+function renderCategoryFilters() {
+    const container = document.getElementById('categoryFilters');
+    
+    // Clear existing (except "All")
+    container.innerHTML = `
+        <span class="badge bg-primary category-badge active" data-category="all">
+            All Commands
+        </span>
+    `;
+    
+    // Add category badges
+    allCategories.forEach(category => {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-secondary category-badge';
+        badge.dataset.category = category;
+        badge.textContent = category.replace('_', ' ').toUpperCase();
+        
+        badge.addEventListener('click', () => filterByCategory(category));
+        
+        container.appendChild(badge);
+    });
+}
+
+function renderCommands(commands) {
+    const container = document.getElementById('commandsContainer');
+    
+    if (commands.length === 0) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info">No commands found</div>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    commands.forEach(cmd => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 mb-3';
+        ">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0"><i class="fas fa-code"></i> ${cmd.name}</h6>
+                        <span class="favorite-star ${favoriteClass}" data-id="${cmd.id}">
+                            ${cmd.is_favorite ? '⭐' : '☆'}
+                        </span>
+                    </div>
+                    
+                    <p class="card-text text-muted small mb-2">${cmd.description || 'No description'}</p>
+                    
+                    <div class="command-code mb-2">
+                        ${cmd.command}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-secondary stats-badge">
+                                <i class="fas fa-tag"></i> ${cmd.category}
+                            </span>
+                            ${osBadge}
+                        </div>
+                        <span class="badge bg-info stats-badge">
+                            <i class="fas fa-chart-line"></i> Used ${cmd.usage_count}x
+                        
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-secondary stats-badge">${cmd.category}</span>
+                            ${osBadge}
+                        </div>
+                        <span class="badge bg-dark stats-badge">Used ${cmd.usage_count}x</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(col);
+    });
+    
+    // Add event listeners
+    addCommandCardListeners();
+    addFavoriteListeners();
+}
+
+function addCommandCardListeners() {
+    document.querySelectorAll('.command-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking favorite star
+            if (e.target.classList.contains('favorite-star')) return;
+            
+            const commandId = this.dataset.commandId;
+            const command = allCommands.find(c => c.id == commandId);
+            
+            if (command) {
+                openExecuteModal(command);
+            }
+        });
+    });
+}
+
+function addFavoriteListeners() {
+    document.querySelectorAll('.favorite-star').forEach(star => {
+        star.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            
+            const id = this.dataset.id;
+            
+            try {
+                await fetch(`/api/commands/${id}/favorite`, {
+                    method: 'POST'
+                });
+                
+                // Toggle visual state
+                this.classList.toggle('active');
+                this.textContent = this.classList.contains('active') ? '⭐' : '☆';
+                
+            } catch (error) {
+                console.error('[ERROR] Toggling favorite:', error);
+            }
+        });
+    });
+}
+
+// =========================
+// Filter Functions
+// =========================
+
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // Update active badge
+    document.querySelectorAll('[data-category]').forEach(badge => {
+        badge.classList.remove('active', 'bg-primary');
+        badge.classList.add('bg-secondary');
+        if (badge.dataset.category === category) {
+            badge.classList.add('active', 'bg-primary');
+            badge.classList.remove('bg-secondary');
+        }
+    });
+    
+    applyFilters();
+}
+
+function filterByOS(osType) {
+    currentOS = osType;
+    
+    // Update active badge
+    document.querySelectorAll('[data-os]').forEach(badge => {
+        badge.classList.remove('active', 'bg-primary');
+        badge.classList.add('bg-secondary');
+        if (badge.dataset.os === osType) {
+            badge.classList.add('active', 'bg-primary');
+            badge.classList.remove('bg-secondary');
+        }
+    });
+    
+    applyFilters();
+}
+
+function applyFilters() {
+    let filtered = allCommands;
+    
+    // Apply category filter
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(cmd => cmd.category === currentCategory);
+    }
+    
+    // Apply OS filter
+    if (currentOS !== 'all') {
+        filtered = filtered.filter(cmd => cmd.os_type === currentOS || cmd.os_type === 'all');
+    }
+    
+    renderCommands(filtered);
+}
+
+function searchCommands() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    
+    let filtered = allCommands;
+    
+    if (query) {
+        filtered = allCommands.filter(cmd => 
+            cmd.name.toLowerCase().includes(query) ||
+            cmd.command.toLowerCase().includes(query) ||
+            cmd.description.toLowerCase().includes(query)
+        );
+    }
+    
+    // Apply category filter to search results
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(cmd => cmd.category === currentCategory);
+    }
+    
+    // Apply OS filter to search results
+    if (currentOS !== 'all') {
+        filtered = filtered.filter(cmd => cmd.os_type === currentOS || cmd.os_type === 'all');
+    }
+    
+    renderCommands(filtered);
+}
+    
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(cmd => cmd.category === currentCategory);
+    }
+    
+    renderCommands(filtered);
+}
+
+// =========================
+// Execute Modal
+// =========================
+
+function openExecuteModal(command) {
+    currentCommand = command;
+    
+    document.getElementById('modalCommand').textContent = command.command;
+    
+    const modal = new bootstrap.Modal(document.getElementById('executeModal'));
+    modal.show();
+}
+
+document.getElementById('modalExecuteBtn').addEventListener('click', async function() {
+    const agent = document.getElementById('modalAgentSelect').value;
+    
+    if (!agent) {
+        alert('Please select an agent');
+        return;
+    }
+    
+    if (!currentCommand) {
+        alert('No command selected');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                agent_alias: agent,
+                command: currentCommand.command,
+                template_id: currentCommand.id
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`Command sent to ${agent} successfully!`);
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('executeModal')).hide();
+            
+            // Reload to update usage count
+            loadCommands();
+        } else {
+            throw new Error(result.error || 'Failed to execute command');
+        }
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+});
+
+// =========================
+// Event Listeners
+// =========================
+
+document.getElementById('searchBtn').addEventListener('click', searchCommands);
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        searchCommands();
+    }
+});
+
+// Category and OS filter badges click handlers
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('category-badge') && e.target.dataset.category) {
+        filterByCategory(e.target.dataset.category);
+    }
+// Logout Handler
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (confirm("Are you sure you want to logout?")) {
+        await fetch("/logout", { method: "POST" });
+        window.location.href = "/login";
+    }
+});
+
+    
+    if (e.target.classList.contains('category-badge') && e.target.dataset.os) {
+        filterByOS(e.target.dataset.os);
+    }
+});
+
+// =========================
+// Initialize
+// =========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadCommands();
+    loadCategories();
+    loadAgents();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+# ========================================
+# ShadowNet .gitignore
+# ========================================
+
+# Environment and secrets (NEVER commit!)
+.env
+.env.local
+.env.*.local
+agent/agent.env
+
+# Database and data
+*.db
+*.db-journal
+data/
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+
+# Docker
+docker-compose.override.yml
+
+# Build artifacts
+agent/agent
+agent/*.exe
+agent/*.out
+server/*.pyo
+
+# Logs
+*.log
+logs/
+*.pid
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# Development/Testing
+.temp/
+tmp/
+test_output.txt
+# But DO track these test files:
+!/server/tests/
+!/server/test_*.py
+!/server/pytest.ini
+
+# Go modules (optional, track go.mod and go.sum in version control)
+# go.sum is usually tracked
+# go.mod is usually tracked
+
+# Sensitive config files — NEVER commit these
+agent/agent.env
+server/key.env
+*.env.local

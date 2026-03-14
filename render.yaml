@@ -1,0 +1,41 @@
+# render.yaml — Render Blueprint for ShadowNet C2 Server
+# Uses a pre-built image from Docker Hub (no GitHub connection needed)
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: shadownet
+    runtime: image
+    image:
+      url: docker.io/divyxin/shadownet:latest
+
+    # Custom domain — add the CNAME record in your DNS FIRST:
+    #   shadownet  CNAME  shadownet.onrender.com
+    domains:
+      - shadownet.divysoni.me
+
+    # Health check path (must return 2xx)
+    healthCheckPath: /health
+
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+      # ── SECRETS — set these in Render Dashboard, NOT here ──────────────
+      # Dashboard → shadownet service → Environment → Add env var
+      #
+      # SHADOWNET_AES_KEY
+      # SHADOWNET_FLASK_SECRET
+      # SHADOWNET_REGISTRATION_SECRET
+      # SHADOWNET_ADMIN_PASSWORD
+      # ───────────────────────────────────────────────────────────────────
+
+    # Persistent disk so SQLite database survives redeploys
+    disk:
+      name: shadownet-data
+      mountPath: /app/data
+      sizeGB: 1

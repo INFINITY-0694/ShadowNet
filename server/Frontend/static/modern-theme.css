@@ -1,0 +1,593 @@
+/* Modern Professional Theme for ShadowNet C2 - 2026 
+   Inspired by modern dashboard design with coral accent
+*/
+
+/* ============================================
+   COLOR VARIABLES
+============================================ */
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #141414;
+    --bg-card: #1e1e1e;
+    --bg-elevated: #242424;
+    
+    --accent-primary: #d87757;
+    --accent-secondary: #8b7dd8;
+    --accent-success: #4ade80;
+    --accent-warning: #fbbf24;
+    --accent-danger: #ef4444;
+    
+    --text-primary: #c3c1ba;
+    --text-secondary: #b7b5a6;
+    --text-muted: #6b6b6b;
+    --text-white: #ffffff;
+    
+    --border-subtle: rgba(195, 193, 186, 0.1);
+    --border-medium: rgba(195, 193, 186, 0.2);
+}
+
+/* Global resets for theme-dark */
+body.theme-dark * {
+    border-color: var(--border-subtle);
+}
+
+body.theme-dark h1,
+body.theme-dark h2,
+body.theme-dark h3,
+body.theme-dark h4,
+body.theme-dark h5,
+body.theme-dark h6 {
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark p,
+body.theme-dark div,
+body.theme-dark span,
+body.theme-dark label {
+    color: var(--text-primary);
+}
+
+body.theme-dark small,
+body.theme-dark .small {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   MODERN DARK THEME - 2026 Professional Style
+   Color Palette: Charcoal + Coral Accent
+============================================ */
+body.theme-dark {
+    background: var(--bg-primary) !important;
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    min-height: 100vh;
+    font-size: 14px;
+}
+
+/* Override Bootstrap backgrounds */
+body.theme-dark.bg-dark {
+    background: var(--bg-primary) !important;
+    background-color: var(--bg-primary) !important;
+}
+
+body.theme-dark,
+body.theme-dark .container-fluid {
+    background: var(--bg-primary) !important;
+}
+
+/* Cards - Clean Modern Style */
+body.theme-dark .stats-card,
+body.theme-dark .card {
+    background: var(--bg-card) !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+body.theme-dark .stats-card:hover,
+body.theme-dark .card:hover {
+    border-color: var(--border-medium);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-dark .card-header {
+    background: var(--bg-elevated) !important;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .card-body {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Buttons - Coral Accent */
+body.theme-dark .btn-primary {
+    background: var(--accent-primary) !important;
+    background-color: var(--accent-primary) !important;
+    border: none !important;
+    color: var(--text-white) !important;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+body.theme-dark .btn-primary:hover {
+    background: #e68565 !important;
+    background-color: #e68565 !important;
+    box-shadow: 0 4px 12px rgba(216, 119, 87, 0.4);
+    transform: translateY(-1px);
+}
+
+body.theme-dark .btn-outline-secondary {
+    border: 1.5px solid var(--border-medium);
+    color: var(--text-primary);
+    background: transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+body.theme-dark .btn-outline-secondary:hover {
+    background: var(--bg-elevated);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+body.theme-dark .btn-outline-danger {
+    border: 1.5px solid var(--accent-danger);
+    color: var(--accent-danger);
+    background: transparent;
+    border-radius: 8px;
+}
+
+body.theme-dark .btn-outline-danger:hover {
+    background: var(--accent-danger);
+    color: white;
+}
+
+body.theme-dark .btn-success {
+    background: var(--accent-success);
+    border: none;
+    color: var(--bg-primary);
+    font-weight: 500;
+}
+
+body.theme-dark .btn-warning {
+    background: var(--accent-warning);
+    border: none;
+    color: var(--bg-primary);
+    font-weight: 500;
+}
+
+body.theme-dark .btn-danger {
+    background: var(--accent-danger);
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+body.theme-dark .btn-secondary {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+/* Tables - Clean Modern */
+body.theme-dark .table {
+    background: var(--bg-card) !important;
+    background-color: var(--bg-card) !important;
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-subtle);
+}
+
+body.theme-dark .table thead th {
+    background: var(--bg-elevated) !important;
+    background-color: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 14px 12px;
+}
+
+body.theme-dark .table tbody tr {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: all 0.15s ease;
+    background: transparent !important;
+}
+
+body.theme-dark .table tbody tr:hover {
+    background: rgba(216, 119, 87, 0.08) !important;
+}
+
+body.theme-dark .table tbody td {
+    padding: 12px;
+    color: var(--text-primary) !important;
+    background: transparent !important;
+}
+
+body.theme-dark .table-dark {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Badges - Modern Clean */
+body.theme-dark .badge {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.3px;
+}
+
+body.theme-dark .badge.bg-success {
+    background: var(--accent-success) !important;
+    color: var(--bg-primary) !important;
+}
+
+body.theme-dark .badge.bg-danger {
+    background: var(--accent-danger) !important;
+    color: white !important;
+}
+
+body.theme-dark .badge.bg-warning {
+    background: var(--accent-warning) !important;
+    color: var(--bg-primary) !important;
+}
+
+body.theme-dark .badge.bg-info {
+    background: var(--accent-secondary) !important;
+    color: white !important;
+}
+
+body.theme-dark .badge.bg-secondary {
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .badge.bg-primary {
+    background: var(--accent-primary) !important;
+    color: white !important;
+}
+
+/* Form Controls - Modern Input */
+body.theme-dark .form-control,
+body.theme-dark .form-select {
+    background: var(--bg-elevated) !important;
+    background-color: var(--bg-elevated) !important;
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+}
+
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(216, 119, 87, 0.15) !important;
+    background: var(--bg-card) !important;
+    outline: none !important;
+}
+
+body.theme-dark .form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .form-label {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+/* Modal - Clean Style */
+body.theme-dark .modal-content {
+    background: var(--bg-card) !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-medium);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .modal-header {
+    background: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 18px 24px;
+}
+
+body.theme-dark .modal-body {
+    background: var(--bg-card) !important;
+    padding: 24px;
+    color: var(--text-primary) !important;
+}
+
+body.theme-dark .modal-footer {
+    background: var(--bg-card) !important;
+    border-top: 1px solid var(--border-subtle);
+    padding: 14px 24px;
+}
+
+body.theme-dark .modal-title {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+}
+
+/* Alerts - Clean Modern */
+body.theme-dark .alert {
+    border-radius: 10px;
+    border: none;
+    border-left: 3px solid;
+}
+
+body.theme-dark .alert-warning {
+    background: rgba(251, 191, 36, 0.12);
+    color: var(--accent-warning);
+    border-left-color: var(--accent-warning);
+}
+
+body.theme-dark .alert-success {
+    background: rgba(74, 222, 128, 0.12);
+    color: var(--accent-success);
+    border-left-color: var(--accent-success);
+}
+
+body.theme-dark .alert-danger {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--accent-danger);
+    border-left-color: var(--accent-danger);
+}
+
+body.theme-dark .alert-info {
+    background: rgba(139, 125, 216, 0.12);
+    color: var(--accent-secondary);
+    border-left-color: var(--accent-secondary);
+}
+
+/* Headers */
+body.theme-dark h1, 
+body.theme-dark h2, 
+body.theme-dark h3, 
+body.theme-dark h4, 
+body.theme-dark h5,
+body.theme-dark h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Text Colors */
+body.theme-dark .text-primary {
+    color: var(--accent-primary) !important;
+}
+
+body.theme-dark .text-success {
+    color: var(--accent-success) !important;
+}
+
+body.theme-dark .text-danger {
+    color: var(--accent-danger) !important;
+}
+
+body.theme-dark .text-warning {
+    color: var(--accent-warning) !important;
+}
+
+body.theme-dark .text-info {
+    color: var(--accent-secondary) !important;
+}
+
+body.theme-dark .text-muted {
+    color: var(--text-muted) !important;
+}
+
+body.theme-dark .text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Accordion - Clean Modern */
+body.theme-dark .accordion-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px !important;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+body.theme-dark .accordion-button {
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border: none;
+    font-weight: 500;
+    padding: 14px 18px;
+}
+
+body.theme-dark .accordion-button:not(.collapsed) {
+    background: rgba(216, 119, 87, 0.15) !important;
+    color: var(--accent-primary) !important;
+}
+
+body.theme-dark .accordion-button::after {
+    filter: brightness(0.8);
+}
+
+body.theme-dark .accordion-body {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 16px 18px;
+}
+
+/* List Group */
+body.theme-dark .list-group-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+body.theme-dark .list-group-item:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border-medium);
+}
+
+/* Scrollbar - Modern */
+body.theme-dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.theme-dark ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 4px;
+}
+
+body.theme-dark ::-webkit-scrollbar-thumb:hover {
+    background: #e68565;
+}
+
+/* Progress Bar */
+body.theme-dark .progress {
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    height: 8px;
+}
+
+body.theme-dark .progress-bar {
+    background: var(--accent-primary);
+    border-radius: 8px;
+}
+
+/* Dropdown */
+body.theme-dark .dropdown-menu {
+    background: var(--bg-card);
+    border: 1px solid var(--border-medium);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 6px;
+}
+
+body.theme-dark .dropdown-item {
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: all 0.15s ease;
+}
+
+body.theme-dark .dropdown-item:hover {
+    background: rgba(216, 119, 87, 0.15);
+    color: var(--accent-primary);
+}
+
+body.theme-dark .dropdown-divider {
+    border-color: var(--border-subtle);
+}
+
+/* Navbar */
+body.theme-dark .navbar {
+    background: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Pagination */
+body.theme-dark .page-link {
+    background: var(--bg-card);
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
+}
+
+body.theme-dark .page-link:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+body.theme-dark .page-item.active .page-link {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* Tooltips */
+body.theme-dark .tooltip-inner {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+}
+
+/* Special Stats Card Enhancement */
+body.theme-dark .stats-card h3,
+body.theme-dark .stats-card h4 {
+    color: var(--text-white);
+}
+
+body.theme-dark .stats-card .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Border Colors */
+body.theme-dark .border-primary {
+    border-color: var(--accent-primary) !important;
+}
+
+body.theme-dark .border-secondary {
+    border-color: var(--border-medium) !important;
+}
+
+body.theme-dark .border-success {
+    border-color: var(--accent-success) !important;
+}
+
+body.theme-dark .border-warning {
+    border-color: var(--accent-warning) !important;
+}
+
+body.theme-dark .border-danger {
+    border-color: var(--accent-danger) !important;
+}
+
+body.theme-dark .border-info {
+    border-color: var(--accent-secondary) !important;
+}
+
+/* Background Colors */
+body.theme-dark .bg-dark {
+    background-color: var(--bg-card) !important;
+}
+
+body.theme-dark .bg-secondary {
+    background-color: var(--bg-elevated) !important;
+}
+
+/* Link Colors */
+body.theme-dark a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+body.theme-dark a:hover {
+    color: #e68565;
+}
+
+/* Focus visible states */
+body.theme-dark *:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* Small text */
+body.theme-dark small {
+    color: var(--text-secondary);
+}

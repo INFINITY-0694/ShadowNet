@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Detail - ShadowNet</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+    
+    <style>
+        .task-completed {
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .task-completed:hover {
+            background-color: rgba(13, 110, 253, 0.15) !important;
+        }
+
+        .accordion-button {
+            background-color: #212529 !important;
+            color: #fff !important;
+            border: 1px solid #444;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #2c3034 !important;
+            color: #fff !important;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+
+        .accordion-item {
+            border: 1px solid #444;
+            margin-bottom: 0.5rem;
+        }
+
+        .accordion-body {
+            background-color: #1a1d20;
+            border-top: 1px solid #444;
+        }
+
+        .list-group-item {
+            padding: 0.75rem 1rem;
+        }
+    </style>
+</head>
+
+<body class="theme-dark">
+
+<div class="container-fluid mt-4">
+
+    <!-- Header with Navigation -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="fas fa-terminal text-primary"></i> ShadowNet C2</h2>
+                    <small class="text-muted">Agent Details: {{ alias }}</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    {% if user_role == 'admin' %}
+                    <a href="/admin-panel" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </a>
+                    {% endif %}
+                    <a href="/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-laptop text-info"></i> Agent Information</h4>
+                    <div id="agentInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Heartbeat Sessions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-heartbeat text-danger"></i> Connection Sessions</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover" id="sessionsTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-play-circle"></i> Start Time</th>
+                                    <th><i class="fas fa-stop-circle"></i> End Time</th>
+                                    <th><i class="fas fa-hourglass-half"></i> Duration</th>
+                                    <th><i class="fas fa-signal"></i> Status</th>
+                                    <th><i class="fas fa-tasks"></i> Tasks</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Events Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-terminal text-success"></i> Task Timeline</h4>
+                    
+                    <div id="taskEventsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incidents Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-exclamation-triangle text-danger"></i> Incidents</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover" id="incidentsTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-bug"></i> Type</th>
+                                    <th><i class="fas fa-exclamation-circle"></i> Severity</th>
+                                    <th><i class="fas fa-flag"></i> Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= Task Output Modal ================= -->
+
+<div class="modal fade" id="taskOutputModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Output</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="taskCommandName" style="margin-bottom: 15px;">
+          <strong>Command:</strong> <span id="taskCmd" class="text-info"></span>
+        </div>
+        <pre id="taskOutputModalBody" style="white-space: pre-wrap; background: #1a1a1a; padding: 15px; border-radius: 5px;"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const alias = "{{ alias }}";
+let agentData = null;
+
+// ================= Helper Functions =================
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return "Invalid Date";
+    
+    try {
+        if (typeof timestamp === 'number') {
+            return new Date(timestamp * 1000).toLocaleString();
+        } else {
+            return new Date(timestamp).toLocaleString();
+        }
+    } catch (e) {
+        return "Invalid Date";
+    }
+}
+
+function formatDuration(seconds) {
+    if (seconds < 60) {
+        return `${Math.floor(seconds)}s`;
+    } else if (seconds < 3600) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}m ${secs}s`;
+    } else {
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        return `${hours}h ${mins}m`;
+    }
+}
+
+function parseDetails(detailsString) {
+    if (!detailsString) return {};
+    
+    try {
+        if (typeof detailsString === 'string') {
+            return JSON.parse(detailsString);
+        }
+        return detailsString;
+    } catch (e) {
+        console.log("[DEBUG] Could not parse details:", detailsString);
+        return {};
+    }
+}
+
+// ================= Load Agent =================
+
+async function loadAgentDetails() {
+    console.log("[DEBUG] Loading agent details for:", alias);
+
+    const response = await fetch(`/api/agent/${alias}`);
+    agentData = await response.json();
+    
+    console.log("[DEBUG] Agent data:", agentData);
+
+    if (!agentData.tasks) {
+        agentData.tasks = [];
+    }
+
+    // Agent Info
+    const identityRows = [
+        agentData.hostname   ? `<div><i class="fas fa-desktop text-muted me-2"></i><strong>Hostname:</strong> <span class="text-info">${agentData.hostname}</span></div>` : '',
+        agentData.ip_address ? `<div><i class="fas fa-network-wired text-muted me-2"></i><strong>IP Address:</strong> <span class="text-info">${agentData.ip_address}</span></div>` : '',
+        agentData.agent_user ? `<div><i class="fas fa-user text-muted me-2"></i><strong>User:</strong> <span class="text-info">${agentData.agent_user}</span></div>` : '',
+        agentData.os_info    ? `<div><i class="fas fa-microchip text-muted me-2"></i><strong>OS:</strong> <span class="text-info">${agentData.os_info}</span></div>` : '',
+    ].filter(Boolean).join('');
+
+    document.getElementById("agentInfo").innerHTML = `
+        <p><strong>Status:</strong>
+            <span class="badge bg-${agentData.status === 'online' ? 'success' : 'danger'}">
+                ${agentData.status}
+            </span>
+        </p>
+        <p><strong>Last Seen:</strong> ${agentData.last_seen || "Never"}</p>
+        ${identityRows}
+    `;
+
+    renderSessions();
+    renderTaskEvents();
+    renderIncidents();
+}
+
+// ================= Render Heartbeat Sessions =================
+
+function renderSessions() {
+    console.log("[DEBUG] Rendering sessions. Total:", agentData.heartbeat_sessions?.length || 0);
+
+    const sessionsBody = document.querySelector("#sessionsTable tbody");
+    sessionsBody.innerHTML = "";
+
+    if (!agentData.heartbeat_sessions || agentData.heartbeat_sessions.length === 0) {
+        sessionsBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No connection sessions recorded</td></tr>';
+        return;
+    }
+
+    agentData.heartbeat_sessions.forEach((session, index) => {
+        const startTime = formatTimestamp(session.start_time);
+        const endTime = formatTimestamp(session.end_time);
+        const duration = formatDuration(session.end_time - session.start_time);
+        
+        const statusBadge = session.status === 'running' 
+            ? '<span class="badge bg-success"><i class="fas fa-spinner fa-pulse"></i> Running</span>'
+            : '<span class="badge bg-secondary"><i class="fas fa-power-off"></i> Disconnected</span>';
+        
+        const taskCount = session.task_ids?.length || 0;
+        const taskInfo = taskCount > 0 
+            ? `<span class="badge bg-info">${taskCount} task${taskCount > 1 ? 's' : ''}</span>`
+            : '<span class="text-muted">No tasks</span>';
+
+        const row = `
+            <tr>
+                <td>${startTime}</td>
+                <td>${endTime}</td>
+                <td>${duration}</td>
+                <td>${statusBadge}</td>
+                <td>${taskInfo}</td>
+            </tr>
+        `;
+
+        sessionsBody.innerHTML += row;
+    });
+}
+
+// ================= Render Task Events (Table Format) =================
+
+function renderTaskEvents() {
+    console.log("[DEBUG] Rendering task events");
+
+    const container = document.getElementById("taskEventsContainer");
+    
+    if (!agentData.task_event_groups || Object.keys(agentData.task_event_groups).length === 0) {
+        container.innerHTML = '<p class="text-center text-muted">No task events</p>';
+        return;
+    }
+
+    // Sort tasks by first event timestamp (newest first)
+    const taskEntries = Object.entries(agentData.task_event_groups);
+    taskEntries.sort((a, b) => {
+        const timeA = a[1][0]?.timestamp || 0;
+        const timeB = b[1][0]?.timestamp || 0;
+        return (typeof timeB === 'number' ? timeB : new Date(timeB).getTime()) - 
+               (typeof timeA === 'number' ? timeA : new Date(timeA).getTime());
+    });
+
+    // Build table
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="min-width: 200px;"><i class="fas fa-terminal"></i> Command</th>
+                        <th><i class="fas fa-flag"></i> Status</th>
+                        <th><i class="fas fa-clock"></i> Queued</th>
+                        <th><i class="fas fa-paper-plane"></i> Sent</th>
+                        <th><i class="fas fa-check-circle"></i> Ack</th>
+                        <th><i class="fas fa-check-double"></i> Completed</th>
+                        <th><i class="fas fa-eye"></i> Output</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    taskEntries.forEach(([taskId, events]) => {
+        // Get task details
+        const task = agentData.tasks.find(t => t.task_id === taskId);
+        const command = task?.command || events[0]?.details?.cmd || 'Unknown command';
+        
+        // Extract timestamps for each event type
+        const queuedEvent = events.find(e => e.event_type === 'task_queued');
+        const sentEvent = events.find(e => e.event_type === 'task_sent');
+        const ackEvent = events.find(e => e.event_type === 'task_ack');
+        const completedEvent = events.find(e => e.event_type === 'task_completed');
+        
+        // Get latest status
+        const latestEvent = events[events.length - 1];
+        const status = latestEvent.event_type;
+        
+        let statusBadge = '';
+        if (status === 'task_completed') {
+            statusBadge = '<span class="badge bg-success"><i class="fas fa-check"></i> Done</span>';
+        } else if (status === 'task_ack') {
+            statusBadge = '<span class="badge bg-info"><i class="fas fa-sync fa-spin"></i> Running</span>';
+        } else if (status === 'task_sent') {
+            statusBadge = '<span class="badge bg-warning"><i class="fas fa-paper-plane"></i> Sent</span>';
+        } else {
+            statusBadge = '<span class="badge bg-secondary"><i class="fas fa-hourglass"></i> Queued</span>';
+        }
+
+        // Format command (truncate if too long)
+        const displayCommand = command.length > 40 ? command.substring(0, 40) + '...' : command;
+        
+        html += `
+            <tr>
+                <td title="${command}">
+                    <code class="text-info" style="font-size: 0.9em;">${displayCommand}</code>
+                </td>
+                <td>${statusBadge}</td>
+                <td class="text-muted" style="font-size: 0.85em;">${queuedEvent ? formatTimestamp(queuedEvent.timestamp) : '-'}</td>
+                <td class="text-muted" style="font-size: 0.85em;">${sentEvent ? formatTimestamp(sentEvent.timestamp) : '-'}</td>
+                <td class="text-muted" style="font-size: 0.85em;">${ackEvent ? formatTimestamp(ackEvent.timestamp) : '-'}</td>
+                <td class="text-muted" style="font-size: 0.85em;">${completedEvent ? formatTimestamp(completedEvent.timestamp) : '-'}</td>
+                <td>
+                    ${task && task.output ? 
+                        `<button class="btn btn-sm btn-outline-info view-output-btn" data-task-id="${taskId}">
+                            <i class="fas fa-eye"></i>
+                        </button>` : 
+                        '<span class="text-muted">-</span>'
+                    }
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+
+    // Add event listeners for output buttons
+    document.querySelectorAll('.view-output-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            showTaskOutput(taskId);
+        });
+    });
+}
+
+
+// ================= Render Incidents =================
+
+function renderIncidents() {
+    console.log("[DEBUG] Rendering incidents. Total:", agentData.incidents.length);
+
+    const incidentsBody = document.querySelector("#incidentsTable tbody");
+    incidentsBody.innerHTML = "";
+
+    if (agentData.incidents.length === 0) {
+        incidentsBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No incidents</td></tr>';
+        return;
+    }
+
+    agentData.incidents.forEach(incident => {
+        incidentsBody.innerHTML += `
+            <tr style="cursor: pointer;" onclick="window.location.href='/incident/${incident.incident_id}'" 
+                onmouseover="this.style.backgroundColor='rgba(13, 110, 253, 0.15)'" 
+                onmouseout="this.style.backgroundColor=''">
+                <td>${incident.type}</td>
+                <td>
+                    <span class="badge bg-${
+                        incident.severity === 'HIGH' ? 'danger' :
+                        incident.severity === 'MEDIUM' ? 'warning' :
+                        incident.severity === 'LOW' ? 'info' :
+                        'secondary'
+                    }">
+                        ${incident.severity}
+                    </span>
+                </td>
+                <td>${incident.status}</td>
+            </tr>
+        `;
+    });
+}
+
+// ================= Show Task Output =================
+
+function showTaskOutput(taskId) {
+    const task = agentData.tasks.find(t => t.task_id === taskId);
+    
+    if (!task) {
+        alert("Task data not found!");
+        return;
+    }
+
+    console.log("[DEBUG] Showing output for task:", task);
+
+    // Show modal
+    document.getElementById("taskCmd").textContent = task.command || "Unknown command";
+    document.getElementById("taskOutputModalBody").textContent = task.output || "No output captured";
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("taskOutputModal")
+    );
+    modal.show();
+}
+
+// ================= Logout Handler =================
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (confirm("Are you sure you want to logout?")) {
+        await fetch("/logout", { method: "POST" });
+        window.location.href = "/login";
+    }
+});
+
+// ================= Load on page ready =================
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("[DEBUG] Page loaded");
+    loadAgentDetails();
+});
+</script>
+
+</body>
+</html>

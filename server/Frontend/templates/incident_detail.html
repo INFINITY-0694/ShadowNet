@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Details - ShadowNet</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body class="theme-dark">
+
+<div class="container-fluid mt-4">
+
+    <!-- Header with Navigation -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="fas fa-terminal text-primary"></i> ShadowNet C2</h2>
+                    <small class="text-muted">Incident Details</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    {% if user_role == 'admin' %}
+                    <a href="/admin-panel" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </a>
+                    {% endif %}
+                    <a href="/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incident Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4><i class="fas fa-exclamation-triangle text-warning"></i> Incident Information</h4>
+                        <button id="resolveBtn"
+                                class="btn btn-success"
+                                style="display:none;">
+                            <i class="fas fa-check-circle"></i> Resolve Incident
+                        </button>
+                    </div>
+                    <div id="incidentInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Events and Task Outputs - 2 Column Layout -->
+    <div class="row mb-4">
+        <!-- Related Events -->
+        <div class="col-md-6">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-history text-info"></i> Related Events</h4>
+                    
+                    <div id="eventsAccordion"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Task Outputs -->
+        <div class="col-md-6">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-tasks text-success"></i> Related Task Outputs</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover" id="tasksTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-terminal"></i> Command</th>
+                                    <th><i class="fas fa-flag"></i> Status</th>
+                                    <th><i class="fas fa-file-alt"></i> Output Preview</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const incidentId = "{{ incident_id }}";
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return "Never";
+    
+    try {
+        // If Unix timestamp (number)
+        if (typeof timestamp === 'number') {
+            return new Date(timestamp * 1000).toLocaleString();
+        }
+        // If string
+        return new Date(timestamp).toLocaleString();
+    } catch (e) {
+        return "Invalid Date";
+    }
+}
+
+async function loadIncident() {
+    try {
+        console.log('[DEBUG] Loading incident:', incidentId);
+        const response = await fetch(`/api/incident/${incidentId}`);
+        
+        console.log('[DEBUG] Response status:', response.status);
+        
+        // Check if redirected to login page
+        if (response.redirected || response.url.includes('/login')) {
+            console.error('[ERROR] Redirected to login - session expired');
+            window.location.href = '/login';
+            return;
+        }
+        
+        if (!response.ok) {
+            console.error(`[ERROR] HTTP error! status: ${response.status}`);
+            if (response.status === 404) {
+                document.getElementById("incidentInfo").innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Error: Incident not found
+                    </div>
+                `;
+                return;
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('[DEBUG] Incident data:', data);
+
+        if (data.error) {
+            console.error('[ERROR] API returned error:', data.error);
+            document.getElementById("incidentInfo").innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> Error: ${data.error}
+                </div>
+            `;
+            return;
+        }
+
+        if (!data.incident) {
+            console.error('[ERROR] No incident data in response');
+            document.getElementById("incidentInfo").innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> Error: Invalid incident data
+                </div>
+            `;
+            return;
+        }
+
+        const incident = data.incident;
+        console.log('[DEBUG] Successfully loaded incident:', incident.type);
+
+    // INCIDENT INFO
+    document.getElementById("incidentInfo").innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-laptop"></i> Agent:</strong></p>
+                <a href="/agent/${incident.agent_alias}" class="text-decoration-none">
+                    <span class="badge bg-info">${incident.agent_alias}</span>
+                </a>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-id-badge"></i> Agent ID:</strong></p>
+                <span class="text-muted small">${incident.agent_id}</span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-bug"></i> Type:</strong></p>
+                <span class="badge bg-secondary">${incident.type}</span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-exclamation-circle"></i> Severity:</strong></p>
+                <span class="badge bg-${
+                    incident.severity === 'HIGH' ? 'danger' :
+                    incident.severity === 'MEDIUM' ? 'warning' :
+                    incident.severity === 'LOW' ? 'info' :
+                    'secondary'
+                }">
+                    ${incident.severity}
+                </span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-flag"></i> Status:</strong></p>
+                <span class="badge bg-${
+                    incident.status === "open" ? "danger" : "success"
+                }">
+                    ${incident.status.toUpperCase()}
+                </span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-2"><strong><i class="fas fa-clock"></i> Start Time:</strong></p>
+                <span class="text-info">${formatTimestamp(incident.start_time)}</span>
+            </div>
+            <div class="col-md-12">
+                <p class="mb-2"><strong><i class="fas fa-check-circle"></i> Resolved Time:</strong></p>
+                <span class="text-success">
+                    ${
+                        incident.resolved_time
+                        ? formatTimestamp(incident.resolved_time)
+                        : "Not resolved yet"
+                    }
+                </span>
+            </div>
+        </div>
+    `;
+
+    // SHOW / HIDE RESOLVE BUTTON
+    const btn = document.getElementById("resolveBtn");
+    btn.style.display = incident.status === "open" ? "inline-block" : "none";
+
+    // EVENTS - Group by sessions with collapsible accordion
+    const eventsContainer = document.getElementById("eventsAccordion");
+    eventsContainer.innerHTML = "";
+
+    if (!data.heartbeat_sessions || data.heartbeat_sessions.length === 0) {
+        eventsContainer.innerHTML = '<p class="text-center text-muted">No connection sessions found</p>';
+    } else {
+        const heartbeatSessions = data.heartbeat_sessions;
+        const allEvents = data.events || [];
+        const taskEventGroups = data.task_event_groups || {};
+
+        let html = '<div class="accordion" id="eventSessionsAccordion">';
+
+        heartbeatSessions.forEach((session, sessionIndex) => {
+            const startTimeStr = formatTimestamp(session.start_time);
+            const endTimeStr   = formatTimestamp(session.end_time);
+            const duration     = session.end_time - session.start_time;
+            const durationStr  = duration < 60   ? `${Math.floor(duration)}s` :
+                                 duration < 3600  ? `${Math.floor(duration/60)}m ${Math.floor(duration%60)}s` :
+                                 `${Math.floor(duration/3600)}h ${Math.floor((duration%3600)/60)}m`;
+
+            // Heartbeats that fall inside this session's window
+            const sessionHeartbeats = allEvents
+                .filter(e => {
+                    if (e.event_type !== 'agent_heartbeat') return false;
+                    const t = typeof e.timestamp === 'number'
+                        ? e.timestamp
+                        : new Date(e.timestamp).getTime() / 1000;
+                    return t >= session.start_time - 1 && t <= session.end_time + 60;
+                })
+                .sort((a, b) => {
+                    const ta = typeof a.timestamp === 'number' ? a.timestamp : new Date(a.timestamp).getTime() / 1000;
+                    const tb = typeof b.timestamp === 'number' ? b.timestamp : new Date(b.timestamp).getTime() / 1000;
+                    return ta - tb;
+                });
+
+            const taskCount      = session.task_ids ? session.task_ids.length : 0;
+            const activeIndicator = session.status === 'running'
+                ? '<span class="badge bg-success ms-2"><i class="fas fa-circle fa-xs"></i> Active</span>'
+                : '';
+
+            html += `
+                <div class="accordion-item bg-dark border-secondary mb-2">
+                    <h2 class="accordion-header" id="heading${sessionIndex}">
+                        <button class="accordion-button collapsed bg-dark text-light" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapse${sessionIndex}">
+                            <div class="w-100 pe-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-wifi text-success"></i>
+                                        <strong>Session ${sessionIndex + 1}</strong>
+                                        <span class="text-muted ms-2 small">${startTimeStr}</span>
+                                        ${activeIndicator}
+                                    </span>
+                                    <span>
+                                        <span class="badge bg-secondary me-1">
+                                            <i class="fas fa-heartbeat"></i> ${sessionHeartbeats.length}
+                                        </span>
+                                        <span class="badge bg-info me-1">
+                                            <i class="fas fa-tasks"></i> ${taskCount}
+                                        </span>
+                                        <span class="badge bg-dark ms-1">${durationStr}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse${sessionIndex}" class="accordion-collapse collapse">
+                        <div class="accordion-body p-2" style="background-color: #1a1d20;">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-striped table-sm mb-2">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-clock"></i> Time</th>
+                                            <th><i class="fas fa-tag"></i> Event</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+            `;
+
+            // First heartbeat
+            if (sessionHeartbeats.length > 0) {
+                html += `<tr>
+                    <td class="text-muted small">${formatTimestamp(sessionHeartbeats[0].timestamp)}</td>
+                    <td><span class="text-muted small">agent_heartbeat</span></td>
+                </tr>`;
+
+                if (sessionHeartbeats.length > 2) {
+                    const hiddenCount = sessionHeartbeats.length - 2;
+                    html += `
+                        <tr>
+                            <td colspan="2" class="text-center py-1">
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-ellipsis-v"></i> ${hiddenCount} heartbeat${hiddenCount > 1 ? 's' : ''} hidden
+                                </span>
+                            </td>
+                        </tr>`;
+                }
+
+                if (sessionHeartbeats.length > 1) {
+                    const last = sessionHeartbeats[sessionHeartbeats.length - 1];
+                    html += `<tr>
+                        <td class="text-muted small">${formatTimestamp(last.timestamp)}</td>
+                        <td><span class="text-muted small">agent_heartbeat</span></td>
+                    </tr>`;
+                }
+            } else {
+                // No raw heartbeats found; fall back to session boundary times
+                html += `<tr>
+                    <td class="text-muted small">${startTimeStr}</td>
+                    <td><span class="text-muted small">session start</span></td>
+                </tr>
+                <tr>
+                    <td class="text-muted small">${endTimeStr}</td>
+                    <td><span class="text-muted small">session end</span></td>
+                </tr>`;
+            }
+
+            html += `</tbody></table></div>`;
+
+            // Tasks section
+            if (session.task_ids && session.task_ids.length > 0) {
+                html += `<div class="mt-3">
+                    <p class="text-muted small mb-2" style="letter-spacing:0.05em;">
+                        <i class="fas fa-terminal me-1"></i> TASKS (${session.task_ids.length})
+                    </p>`;
+
+                session.task_ids.forEach((taskId, taskIdx) => {
+                    const taskEvs  = (taskEventGroups[taskId] || []).slice().sort((a, b) => {
+                        const ta = typeof a.timestamp === 'number' ? a.timestamp : new Date(a.timestamp).getTime() / 1000;
+                        const tb = typeof b.timestamp === 'number' ? b.timestamp : new Date(b.timestamp).getTime() / 1000;
+                        return ta - tb;
+                    });
+                    const task     = (data.tasks || []).find(t => t.task_id === taskId);
+                    const command  = task?.command || taskEvs[0]?.details?.cmd || 'Unknown';
+                    const output   = task?.output || null;
+
+                    const latestType = taskEvs.length > 0 ? taskEvs[taskEvs.length - 1].event_type : null;
+                    let badgeClass = 'secondary', badgeIcon = 'fa-hourglass', badgeLabel = 'Queued';
+                    if (latestType === 'task_completed')  { badgeClass='success'; badgeIcon='fa-check-double'; badgeLabel='Done';    }
+                    else if (latestType === 'task_ack')   { badgeClass='info';    badgeIcon='fa-sync fa-spin'; badgeLabel='Running'; }
+                    else if (latestType === 'task_sent')  { badgeClass='warning'; badgeIcon='fa-paper-plane';  badgeLabel='Sent';    }
+
+                    const uniqueId    = `tinc-${sessionIndex}-${taskIdx}`;
+                    const collapseId  = `tinc-body-${sessionIndex}-${taskIdx}`;
+
+                    // Build timeline pills
+                    let timelineHtml = '';
+                    const tlDefs = {
+                        task_queued:    { icon:'fa-clock',        color:'secondary', label:'Queued'      },
+                        task_sent:      { icon:'fa-paper-plane',  color:'primary',   label:'Sent'        },
+                        task_ack:       { icon:'fa-check-circle', color:'info',      label:'Acknowledged'},
+                        task_completed: { icon:'fa-check-double', color:'success',   label:'Completed'   }
+                    };
+                    taskEvs.forEach((ev, i) => {
+                        const d = tlDefs[ev.event_type] || { icon:'fa-circle', color:'secondary', label: ev.event_type };
+                        if (i > 0) timelineHtml += `<span class="text-muted mx-1" style="font-size:0.75em;">→</span>`;
+                        timelineHtml += `
+                            <span class="d-inline-flex flex-column align-items-center" style="gap:2px;">
+                                <span class="badge bg-${d.color}" style="font-size:0.72em;">
+                                    <i class="fas ${d.icon} me-1"></i>${d.label}
+                                </span>
+                                <span class="text-muted" style="font-size:0.7em;">${formatTimestamp(ev.timestamp)}</span>
+                            </span>`;
+                    });
+
+                    // Output block (escaped for safe display)
+                    let outputHtml = '';
+                    if (output) {
+                        const escaped = output.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        outputHtml = `
+                            <div class="mt-2">
+                                <p class="text-muted mb-1" style="font-size:0.78em;">
+                                    <i class="fas fa-file-alt me-1"></i> OUTPUT:
+                                </p>
+                                <pre class="mb-0 p-2 text-success" style="background:#0d1117; border-radius:5px; font-size:0.78em; max-height:200px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;">${escaped}</pre>
+                            </div>`;
+                    } else if (latestType === 'task_completed') {
+                        outputHtml = `<p class="text-muted mt-2 mb-0" style="font-size:0.8em;"><i class="fas fa-info-circle me-1"></i>No output captured.</p>`;
+                    }
+
+                    html += `
+                        <div class="mb-2" style="border-radius:7px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
+                            <!-- Header row -->
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2"
+                                 style="background:rgba(13,110,253,0.12); cursor:pointer;"
+                                 onclick="const b=document.getElementById('${collapseId}'); b.style.display=b.style.display==='none'?'block':'none'; this.querySelector('.toggle-icon').classList.toggle('fa-chevron-down'); this.querySelector('.toggle-icon').classList.toggle('fa-chevron-up');">
+                                <span class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-terminal text-info" style="font-size:0.85em;"></i>
+                                    <code class="text-light" style="font-size:0.88em;" title="${command}">${command}</code>
+                                </span>
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-${badgeClass}">
+                                        <i class="fas ${badgeIcon} me-1"></i>${badgeLabel}
+                                    </span>
+                                    <i class="fas fa-chevron-down toggle-icon text-muted" style="font-size:0.75em;"></i>
+                                </span>
+                            </div>
+                            <!-- Expandable body -->
+                            <div id="${collapseId}" style="display:none; background:#12151a; padding:10px 14px;">
+                                <p class="text-muted mb-2" style="font-size:0.78em; letter-spacing:0.04em;">TIMELINE:</p>
+                                <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                                    ${timelineHtml}
+                                </div>
+                                ${outputHtml}
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div>`;
+            }
+
+            html += `
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        eventsContainer.innerHTML = html;
+    }
+
+    // TASKS
+    const tasksBody = document.querySelector("#tasksTable tbody");
+    tasksBody.innerHTML = "";
+
+    const completedTasks = data.tasks ? data.tasks.filter(t => t.status === "done") : [];
+    
+    if (completedTasks.length > 0) {
+        completedTasks.forEach(task => {
+            tasksBody.innerHTML += `
+                <tr>
+                    <td>${task.command}</td>
+                    <td>
+                        <span class="badge bg-success">
+                            ${task.status}
+                        </span>
+                    </td>
+                    <td style="max-width:300px; overflow:hidden;">
+                        ${task.output ? task.output.substring(0,100) + "..." : ""}
+                    </td>
+                </tr>
+            `;
+        });
+    } else {
+        tasksBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No completed tasks found</td></tr>';
+    }
+    } catch (error) {
+        console.error('[ERROR] Failed to load incident:', error);
+        const infoElement = document.getElementById("incidentInfo");
+        if (infoElement) {
+            infoElement.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    <strong>Error loading incident:</strong> ${error.message}
+                    <br><small>Check console for details</small>
+                </div>
+            `;
+        }
+        
+        // Clear tables
+        const eventsBody = document.querySelector("#eventsTable tbody");
+        const tasksBody = document.querySelector("#tasksTable tbody");
+        if (eventsBody) eventsBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">Unable to load events</td></tr>';
+        if (tasksBody) tasksBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Unable to load tasks</td></tr>';
+    }
+}
+
+async function resolveIncident() {
+    try {
+        console.log('[DEBUG] Resolving incident:', incidentId);
+        const response = await fetch(`/api/incident/${incidentId}`, {
+            method: "PATCH"
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to resolve incident: ${response.status}`);
+        }
+
+        console.log('[DEBUG] Incident resolved, reloading...');
+        loadIncident(); // refresh after resolving
+    } catch (error) {
+        console.error('[ERROR] Failed to resolve incident:', error);
+        alert('Failed to resolve incident. Please try again.');
+    }
+}
+
+// Logout Handler
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();  // Prevent any default action
+    if (confirm("Are you sure you want to logout?")) {
+        try {
+            await fetch("/logout", { method: "POST" });
+            window.location.href = "/login";
+        } catch (error) {
+            console.error('[ERROR] Logout failed:', error);
+            window.location.href = "/login";
+        }
+    }
+});
+
+// Initialize page
+document.addEventListener("DOMContentLoaded", () => {
+    console.log('[DEBUG] Incident detail page loaded, incident ID:', incidentId);
+    
+    // Verify incident ID is valid
+    if (!incidentId || incidentId === 'undefined' || incidentId === 'null') {
+        console.error('[ERROR] Invalid incident ID:', incidentId);
+        document.getElementById("incidentInfo").innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> Invalid incident ID
+            </div>
+        `;
+        return;
+    }
+    
+    // Load incident data
+    loadIncident();
+
+    // Setup resolve button
+    const resolveBtn = document.getElementById("resolveBtn");
+    if (resolveBtn) {
+        resolveBtn.addEventListener("click", resolveIncident);
+    }
+});
+</script>
+
+</body>
+</html>

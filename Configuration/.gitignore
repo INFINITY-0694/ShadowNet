@@ -1,0 +1,131 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+shadownet.db
+
+# Environment variables
+*.env
+key.env
+agent.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Agent binaries
+agent/agent
+agent/agent.exe
+agent/agent_*
+agent/shadownet_*
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Security sensitive
+*.key
+*.pem
+*.cert
+*.crt
+secrets/
+credentials/
+
+# Backup files
+*.backup
+*~
+
+# Node (if used for frontend build)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation builds
+docs/_build/
+site/
+
+
+# ===========================================
+# ShadowNet .gitignore
+# ===========================================
+
+# ⚠️  Secret config — NEVER commit these
+*.env
+agent.env
+.env
+
+# Database — contains real agent data
+*.db
+shadownet.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Go build output
+shadownet-agent
+shadownet-agent.exe
+*.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

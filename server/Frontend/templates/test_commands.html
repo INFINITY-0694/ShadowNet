@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Commands Page</title>
+</head>
+<body>
+    <h1>Testing Commands API</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Test 1: Check session
+                statusDiv.innerHTML = 'Checking session...';
+                const sessionResp = await fetch('/api/session');
+                const sessionData = await sessionResp.json();
+                
+                if (!sessionData.logged_in) {
+                    statusDiv.innerHTML = '<strong style="color: red;">❌ NOT LOGGED IN</strong>';
+                    resultDiv.innerHTML = '<p>You need to <a href="/login">login first</a>.</p>';
+                    return;
+                }
+                
+                statusDiv.innerHTML = '✓ Logged in as: ' + sessionData.username;
+                
+                // Test 2: Fetch commands
+                const commandsResp = await fetch('/api/commands');
+                
+                if (!commandsResp.ok) {
+                    throw new Error('Failed to fetch commands: ' + commandsResp.status);
+                }
+                
+                const contentType = commandsResp.headers.get('content-type');
+                if (!contentType.includes('application/json')) {
+                    throw new Error('Response is not JSON, got: ' + contentType);
+                }
+                
+                const commands = await commandsResp.json();
+                
+                resultDiv.innerHTML = `
+                    <h2 style="color: green;">✓ SUCCESS!</h2>
+                    <p><strong>Found ${commands.length} commands</strong></p>
+                    <h3>First 5 commands:</h3>
+                    <ul>
+                        ${commands.slice(0, 5).map(cmd => 
+                            `<li><strong>${cmd.name}</strong>: <code>${cmd.command}</code></li>`
+                        ).join('')}
+                    </ul>
+                    <p><a href="/commands">Go to Commands Library</a></p>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<strong style="color: red;">❌ ERROR</strong>';
+                resultDiv.innerHTML = '<pre>' + error.message + '</pre><p><a href="/login">Go to Login</a></p>';
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

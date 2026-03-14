@@ -1,0 +1,48 @@
+# .dockerignore — keeps the Docker build context lean
+
+# Version control
+.git
+.gitignore
+
+# Python caches & test artifacts
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.coverage
+**/test_output.txt
+
+# Virtual environments
+.venv
+venv
+ENV
+
+# Local databases (Render uses /app/data volume)
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Agent binaries (only need agent.env)
+agent/agent.exe
+agent/agent_test.exe
+agent/stages/
+agent/agent/
+
+# Dev config only (secrets injected via env vars on Render)
+.env
+.env.docker
+server/key.env
+Configuration/
+
+# Documentation & research (not needed in container)
+Core\ Documentation/
+Research\ Docs/
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db

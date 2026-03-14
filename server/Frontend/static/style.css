@@ -1,0 +1,1292 @@
+/* ==========================================
+   ShadowNet C2 - Professional Enterprise Theme
+   Clean, Minimal, Professional Design
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1d24;
+    min-height: 100vh;
+    color: #e4e6eb;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   Container & Layout
+   ========================================== */
+
+.container-fluid {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* ==========================================
+   Typography
+   ========================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+h2 {
+    font-size: 1.75rem;
+    letter-spacing: -0.025em;
+}
+
+h5 {
+    font-size: 1.125rem;
+}
+
+h6 {
+    font-size: 1rem;
+}
+
+small {
+    font-size: 0.875rem;
+    color: #9ba3af;
+}
+
+.text-muted {
+    color: #9ba3af !important;
+}
+
+/* ==========================================
+   Cards - Clean Professional Style
+   ========================================== */
+
+.card {
+    background: #23262f;
+    border: 1px solid #2d3139;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    margin-bottom: 24px;
+}
+
+.card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-color: #3d4149;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.bg-secondary {
+    background: #23262f !important;
+}
+
+/* ==========================================
+   Stats Cards
+   ========================================== */
+
+.stats-card {
+    background: #23262f;
+    border: 1px solid #2d3139;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.stats-card .h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0;
+}
+
+.stats-card .text-muted {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================
+   Agent Selector Card
+   ========================================== */
+
+.agent-selector-card {
+    border: 1px solid #3b82f6;
+    background: #23262f;
+}
+
+/* ==========================================
+   Section Headers
+   ========================================== */
+
+.section-header {
+    border-left: 4px solid #3b82f6;
+    padding-left: 12px;
+    margin-bottom: 20px;
+    font-size: 1.125rem;
+    color: #ffffff;
+}
+
+/* ==========================================
+   Tables - Professional Style
+   ========================================== */
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: #2d3139;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #9ba3af;
+}
+
+.table thead th {
+    padding: 0.875rem 1rem;
+    border: none;
+    border-bottom: 1px solid #3d4149;
+    font-weight: 600;
+}
+
+.table tbody tr {
+    background: transparent;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #2d3139;
+}
+
+.table tbody tr:hover {
+    background: #2d3139;
+}
+
+.table tbody td {
+    padding: 1rem;
+    border: none;
+    vertical-align: middle;
+    color: #e4e6eb;
+}
+
+.table-dark {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: #2d3139;
+    --bs-table-border-color: #2d3139;
+    color: #e4e6eb;
+}
+
+.agent-row {
+    cursor: pointer;
+}
+
+.agent-row:hover {
+    background: #2d3139 !important;
+}
+
+#eventsTable td:nth-child(3) {
+    font-family: 'Courier New', monospace;
+    color: #60a5fa;
+}
+
+/* ==========================================
+   Badges - Professional Style
+   ========================================== */
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.badge.bg-success {
+    background: #10b981 !important;
+    color: #ffffff;
+}
+
+.badge.bg-danger {
+    background: #ef4444 !important;
+    color: #ffffff;
+}
+
+.badge.bg-warning {
+    background: #f59e0b !important;
+    color: #ffffff;
+}
+
+.badge.bg-info {
+    background: #3b82f6 !important;
+    color: #ffffff;
+}
+
+.badge.bg-primary {
+    background: #3b82f6 !important;
+    color: #ffffff;
+}
+
+.badge.bg-secondary {
+    background: #6b7280 !important;
+    color: #ffffff;
+}
+
+/* ==========================================
+   Buttons - Professional Style
+   ========================================== */
+
+.btn {
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    font-weight: 500;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary:disabled {
+    background: #4b5563;
+    border-color: #4b5563;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #4b5563;
+    border-color: #4b5563;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background: #374151;
+    border-color: #374151;
+    color: #ffffff;
+}
+
+.btn-outline-secondary {
+    border-color: #4b5563;
+    color: #e4e6eb;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #4b5563;
+    border-color: #4b5563;
+    color: #ffffff;
+}
+
+.btn-outline-danger {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+.btn-outline-light {
+    border-color: #6b7280;
+    color: #e4e6eb;
+    background: transparent;
+}
+
+.btn-outline-light:hover {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: #ffffff;
+}
+
+.btn-sm {
+    font-size: 0.813rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* ==========================================
+   Forms - Clean Professional Style
+   ========================================== */
+
+.form-control, .form-select {
+    background: #2d3139;
+    border: 1px solid #3d4149;
+    color: #e4e6eb !important;
+    transition: all 0.15s ease;
+    border-radius: 6px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #23262f;
+    color: #e4e6eb !important;
+    outline: none;
+}
+
+.form-control:disabled {
+    background: #1a1d24;
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #2d3139;
+    color: #6b7280 !important;
+}
+
+.form-control::placeholder {
+    color: #6b7280 !important;
+}
+
+.form-select option {
+    background: #23262f !important;
+    color: #e4e6eb !important;
+}
+
+/* Ensure select dropdown text is visible */
+.form-select {
+    color: #e4e6eb !important;
+    background-color: #2d3139 !important;
+}
+
+/* Override any Bootstrap default select styling */
+select.form-select option {
+    background: #1a1d24 !important;
+    color: #e4e6eb !important;
+}
+
+select.form-select option:checked {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.input-group-text {
+    font-weight: 500;
+    background: #2d3139 !important;
+    border: 1px solid #3d4149;
+    color: #9ba3af !important;
+}
+
+/* Ensure input group icons are visible */
+.input-group-text i {
+    color: inherit;
+}
+
+.input-group-text.text-success {
+    color: #10b981 !important;
+}
+
+.input-group-text.bg-dark {
+    background: #2d3139 !important;
+    color: #9ba3af !important;
+}
+
+.form-label {
+    color: #e4e6eb !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Ensure labels are always visible */
+label {
+    color: #e4e6eb !important;
+}
+
+.form-select option {
+    background: #23262f;
+    color: #e4e6eb;
+}
+
+/* ==========================================
+   Command Terminal
+   ========================================== */
+
+.command-terminal {
+    background: #1a1d24;
+    border: 1px solid #2d3139;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 16px;
+    font-size: 0.875rem;
+}
+
+.command-history-item {
+    border-left: 3px solid #3b82f6;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #23262f;
+    border-radius: 4px;
+}
+
+.command-history-item.border-success {
+    border-color: #10b981;
+}
+
+.command-history-item.border-danger {
+    border-color: #ef4444;
+}
+
+.command-history-item.border-info {
+    border-color: #3b82f6;
+}
+
+.command-output {
+    background: #1a1d24;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 8px;
+    color: #9ba3af;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #2d3139;
+    font-size: 0.813rem;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   Quick Commands
+   ========================================== */
+
+.quick-command-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.quick-cmd-btn {
+    background: #2d3139;
+    border: 1px solid #3d4149;
+    color: #e4e6eb;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: left;
+    transition: all 0.15s ease;
+    font-size: 0.813rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.quick-cmd-btn:hover {
+    background: #3d4149;
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+.quick-cmd-btn i {
+    margin-right: 6px;
+}
+
+/* ==========================================
+   Modals
+   ========================================== */
+
+.modal-content {
+    background: #23262f;
+    border: 1px solid #2d3139;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-bottom: 1px solid #2d3139;
+}
+
+.modal-title {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.modal-footer {
+    border-top: 1px solid #2d3139;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+    opacity: 0.7;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+/* ==========================================
+   Status Indicators
+   ========================================== */
+
+.fa-circle.text-success {
+    color: #10b981;
+}
+
+.fa-circle.text-danger {
+    color: #ef4444;
+}
+
+/* ==========================================
+   Text Colors
+   ========================================== */
+
+.text-info {
+    color: #60a5fa !important;
+}
+
+.text-light {
+    color: #e4e6eb !important;
+}
+
+.text-success {
+    color: #10b981 !important;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+.text-danger {
+    color: #ef4444 !important;
+}
+
+.text-primary {
+    color: #3b82f6 !important;
+}
+
+.fw-bold {
+    font-weight: 700;
+}
+
+.fw-semibold {
+    font-weight: 600;
+}
+
+/* ==========================================
+   Utilities
+   ========================================== */
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================
+   Scrollbar - Professional Style
+   ========================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1d24;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* ==========================================
+   Alerts
+   ========================================== */
+
+.alert {
+    border-radius: 6px;
+    border: 1px solid;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+/* ==========================================
+   Header Enhancements
+   ========================================== */
+
+.d-flex.justify-content-between {
+    background: #23262f;
+    border: 1px solid #2d3139;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.fa-user-circle {
+    color: #60a5fa;
+    font-size: 1.25rem;
+}
+
+/* ==========================================
+   Loading States
+   ========================================== */
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   Responsive Design
+   ========================================== */
+
+@media (max-width: 1200px) {
+    .stats-card .stat-icon {
+        font-size: 2rem;
+    }
+    
+    .stats-card .h3 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 16px;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .quick-command-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* ==========================================
+   Additional Utilities
+   ========================================== */
+
+.bg-dark {
+    background-color: #1a1d24 !important;
+}
+
+.border-secondary {
+    border-color: #2d3139 !important;
+}
+
+.table-responsive {
+    border-radius: 8px;
+}
+
+/* ==========================================
+   Text Visibility Fixes - Ensure All Text is Readable
+   ========================================== */
+
+/* Override Bootstrap defaults for dark theme */
+p, span, div, label, strong, b, em, i:not(.fas):not(.far):not(.fab) {
+    color: inherit;
+}
+
+/* Ensure all text elements have light color on dark backgrounds */
+.bg-dark *, 
+.card *, 
+.modal-content *,
+.table * {
+    color: #e4e6eb;
+}
+
+/* Specific fixes for elements that might have dark text */
+.card p,
+.card span:not(.badge),
+.card div:not([class*="bg-"]),
+.card label,
+.modal-content p,
+.modal-content span:not(.badge),
+.modal-content label {
+    color: #e4e6eb !important;
+}
+
+/* Force visible text in all contexts */
+body, body * {
+    color: #e4e6eb;
+}
+
+/* Headings should always be white */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #ffffff !important;
+}
+
+/* Links should be visible */
+a {
+    color: #60a5fa;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+/* Strong/bold text */
+strong, b {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Labels and form text */
+label, .form-label {
+    color: #e4e6eb !important;
+    font-weight: 500;
+}
+
+/* Small text and captions */
+small, .small, caption {
+    color: #9ba3af !important;
+}
+
+/* Ensure placeholder text is visible */
+::placeholder {
+    color: #6b7280 !important;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: #6b7280 !important;
+}
+
+::-ms-input-placeholder {
+    color: #6b7280 !important;
+}
+
+/* Pre and code blocks */
+pre, code {
+    color: #10b981 !important;
+    background: #1a1d24;
+    border: 1px solid #2d3139;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Table text */
+table, table * {
+    color: #e4e6eb !important;
+}
+
+table thead th {
+    color: #9ba3af !important;
+}
+
+/* Modal content */
+.modal-content {
+    color: #e4e6eb !important;
+}
+
+.modal-title {
+    color: #ffffff !important;
+}
+
+/* Card content */
+.card-body {
+    color: #e4e6eb;
+}
+
+.card-title {
+    color: #ffffff !important;
+}
+
+.card-text {
+    color: #e4e6eb !important;
+}
+
+/* Input and select text */
+input, select, textarea {
+    color: #e4e6eb !important;
+}
+
+input:disabled, select:disabled, textarea:disabled {
+    color: #6b7280 !important;
+}
+
+/* Dropdown options */
+option {
+    background: #23262f !important;
+    color: #e4e6eb !important;
+}
+
+/* Alert text should match alert type */
+.alert {
+    color: inherit !important;
+}
+
+.alert-success {
+    color: #10b981 !important;
+}
+
+.alert-danger {
+    color: #ef4444 !important;
+}
+
+.alert-info {
+    color: #3b82f6 !important;
+}
+
+.alert-warning {
+    color: #f59e0b !important;
+}
+
+/* Badge text is handled by badge styles */
+.badge {
+    color: #ffffff !important;
+}
+
+/* Button text */
+.btn {
+    color: #ffffff;
+}
+
+/* List items */
+li {
+    color: #e4e6eb;
+}
+
+/* Definition lists */
+dt {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+dd {
+    color: #e4e6eb !important;
+}
+
+/* Blockquotes */
+blockquote {
+    color: #9ba3af;
+    border-left: 4px solid #3b82f6;
+    padding-left: 1rem;
+}
+
+/* Horizontal rules */
+hr {
+    border-color: #2d3139 !important;
+    opacity: 1;
+}
+
+/* Fix any Bootstrap default colors */
+.text-dark {
+    color: #e4e6eb !important;
+}
+
+.text-body {
+    color: #e4e6eb !important;
+}
+
+.text-black-50 {
+    color: #9ba3af !important;
+}
+
+/* Ensure icons from Font Awesome inherit proper colors */
+.fas, .far, .fab, .fa {
+    color: inherit;
+}
+
+/* Override any potential Bootstrap conflicts */
+.bg-light {
+    background-color: #2d3139 !important;
+    color: #e4e6eb !important;
+}
+
+.bg-white {
+    background-color: #23262f !important;
+    color: #e4e6eb !important;
+}
+
+/* Fix input group text */
+.input-group-text {
+    color: #9ba3af !important;
+    background-color: #2d3139 !important;
+    border-color: #3d4149 !important;
+}
+
+/* Close button visibility */
+.btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+/* Ensure command output is visible */
+.command-output {
+    color: #9ba3af !important;
+}
+
+.command-code {
+    color: #10b981 !important;
+}
+
+/* Footer text if any */
+footer {
+    color: #9ba3af;
+}
+
+/* Spinner/loading text */
+.spinner-border {
+    color: #3b82f6 !important;
+}
+
+/* Visually hidden (accessibility) */
+.visually-hidden {
+    color: transparent !important;
+}
+
+/* ==========================================
+   Icon Improvements
+   ========================================== */
+
+.fas, .far, .fab {
+    vertical-align: middle;
+}
+
+i.fas + span,
+i.far + span,
+i.fab + span {
+    margin-left: 0.25rem;
+}
+
+/* ==========================================
+   Hover Effects - Subtle
+   ========================================== */
+
+.hover-highlight {
+    transition: background-color 0.15s ease;
+}
+
+.hover-highlight:hover {
+    background: #2d3139 !important;
+}
+
+/* ==========================================
+   Final Comprehensive Text Visibility Overrides
+   ========================================== */
+
+/* Catch-all for any remaining visibility issues */
+* {
+    /* Ensure no element has pure black text */
+}
+
+*:not(.badge):not(.btn):not(.alert) {
+    color: #e4e6eb;
+}
+
+/* Specific overrides for common Bootstrap elements */
+.list-group-item {
+    background: #23262f;
+    color: #e4e6eb !important;
+    border-color: #2d3139;
+}
+
+.list-group-item:hover {
+    background: #2d3139;
+}
+
+/* Ensure all card elements are visible */
+.card * {
+    color: #e4e6eb;
+}
+
+.card h1, .card h2, .card h3, .card h4, .card h5, .card h6 {
+    color: #ffffff !important;
+}
+
+/* Table cell text */
+td, th {
+    color: #e4e6eb !important;
+}
+
+/* Ensure nav elements are visible */
+nav, nav * {
+    color: #e4e6eb;
+}
+
+.navbar-brand {
+    color: #ffffff !important;
+}
+
+/* Fix any remaining form elements */
+textarea.form-control {
+    color: #e4e6eb !important;
+}
+
+/* Ensure all validation feedback is visible */
+.valid-feedback {
+    color: #10b981 !important;
+}
+
+.invalid-feedback {
+    color: #ef4444 !important;
+}
+
+/* Fix dropdown menus */
+.dropdown-menu {
+    background: #23262f;
+    border: 1px solid #2d3139;
+}
+
+.dropdown-item {
+    color: #e4e6eb !important;
+}
+
+.dropdown-item:hover {
+    background: #2d3139;
+    color: #ffffff !important;
+}
+
+/* Ensure tooltips are visible */
+.tooltip-inner {
+    background: #1a1d24;
+    color: #e4e6eb !important;
+    border: 1px solid #2d3139;
+}
+
+/* Popover content */
+.popover {
+    background: #23262f;
+    border: 1px solid #2d3139;
+}
+
+.popover-body {
+    color: #e4e6eb !important;
+}
+
+.popover-header {
+    background: #2d3139;
+    color: #ffffff !important;
+    border-bottom: 1px solid #3d4149;
+}
+
+/* Breadcrumb visibility */
+.breadcrumb {
+    background: transparent;
+}
+
+.breadcrumb-item {
+    color: #9ba3af;
+}
+
+.breadcrumb-item.active {
+    color: #e4e6eb !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+    background: #23262f;
+    color: #e4e6eb !important;
+    border-color: #2d3139;
+}
+
+.pagination .page-link:hover {
+    background: #2d3139;
+    color: #ffffff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff !important;
+}
+
+/* Progress bars */
+.progress {
+    background: #2d3139;
+}
+
+.progress-bar {
+    color: #ffffff !important;
+}
+
+/* Jumbotron/Hero sections */
+.jumbotron {
+    background: #23262f;
+    color: #e4e6eb !important;
+}
+
+/* Ensure accordion content is visible */
+.accordion-item {
+    background: #23262f;
+    border-color: #2d3139;
+}
+
+.accordion-button {
+    background: #2d3139;
+    color: #e4e6eb !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: #3b82f6;
+    color: #ffffff !important;
+}
+
+.accordion-body {
+    background: #23262f;
+    color: #e4e6eb !important;
+}
+
+/* Tab navigation */
+.nav-tabs .nav-link {
+    color: #9ba3af;
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #e4e6eb;
+}
+
+.nav-tabs .nav-link.active {
+    background: #23262f;
+    color: #ffffff !important;
+    border-color: #2d3139 #2d3139 #23262f;
+}
+
+/* Ensure offcanvas content is visible */
+.offcanvas {
+    background: #1a1d24;
+    color: #e4e6eb !important;
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid #2d3139;
+}
+
+.offcanvas-title {
+    color: #ffffff !important;
+}
+
+/* Fix any potential issues with shadows/overlays */
+.modal-backdrop {
+    background-color: #000000;
+}
+
+/* Ensure all text in dark contexts is visible */
+.bg-dark, .bg-dark * {
+    color: #e4e6eb !important;
+}
+
+.bg-secondary, .bg-secondary * {
+    color: #e4e6eb !important;
+}
+
+/* Override Bootstrap's default dark text utilities */
+.text-dark {
+    color: #e4e6eb !important;
+}
+
+.text-body {
+    color: #e4e6eb !important;
+}
+
+.text-muted {
+    color: #9ba3af !important;
+}
+
+.text-black-50 {
+    color: #9ba3af !important;
+}
+
+/* Ensure figure captions are visible */
+figcaption {
+    color: #9ba3af;
+}
+
+/* Mark/highlight text */
+mark {
+    background: #f59e0b;
+    color: #1a1d24 !important;
+    padding: 0.125rem 0.25rem;
+}
+
+/* Abbreviations */
+abbr[title] {
+    color: #60a5fa;
+    text-decoration-color: #3b82f6;
+}
+
+/* Keyboard input */
+kbd {
+    background: #2d3139;
+    color: #e4e6eb !important;
+    border: 1px solid #3d4149;
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+}
+
+/* Sample output */
+samp {
+    color: #10b981 !important;
+}
+
+/* Variables */
+var {
+    color: #f59e0b;
+}

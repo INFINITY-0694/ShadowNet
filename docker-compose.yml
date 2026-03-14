@@ -1,0 +1,92 @@
+version: '3.9'
+
+services:
+  # ShadowNet C2 Server
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shadownet-server
+    ports:
+      - "${SERVER_PORT:-5000}:5000"
+    environment:
+      # Flask Configuration
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
+      
+      # Security Keys (MUST be set - use strong random values)
+      SHADOWNET_AES_KEY: ${SHADOWNET_AES_KEY}
+      SHADOWNET_FLASK_SECRET: ${SHADOWNET_FLASK_SECRET}
+      SHADOWNET_REGISTRATION_SECRET: ${SHADOWNET_REGISTRATION_SECRET}
+      SHADOWNET_ADMIN_PASSWORD: ${SHADOWNET_ADMIN_PASSWORD:-admin123}
+      
+      # Database Configuration
+      SHADOWNET_DB_PATH: /app/data/shadownet.db
+      SHADOWNET_ENV_FILE: /app/data/agent.env
+      
+      # Server Configuration
+      SHADOWNET_SERVER_HOST: 0.0.0.0
+      SHADOWNET_SERVER_PORT: 5000
+    
+    volumes:
+      # Persist database and data
+      - shadownet-data:/app/data
+      # Optional: Mount agent.env from host if local development
+      - ./agent/agent.env:/app/data/agent.env:ro
+    
+    restart: unless-stopped
+    networks:
+      - shadownet-network
+    
+    # Wait for network to be ready before starting
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Traefik reverse proxy for custom domain support
+  reverse-proxy:
+    image: traefik:v2.10
+    container_name: shadownet-proxy
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - shadownet-letsencrypt:/letsencrypt
+    networks:
+      - shadownet-network
+    restart: unless-stopped
+    environment:
+      - TRAEFIK_DASHBOARD_USER=${TRAEFIK_USER:-admin}
+      - TRAEFIK_DASHBOARD_PASSWORD=${TRAEFIK_PASSWORD:-admin}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${CUSTOM_DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_USER:-admin}:${TRAEFIK_PASSWORD:-admin}"
+
+volumes:
+  shadownet-data:
+    driver: local
+  shadownet-letsencrypt:
+    driver: local
+
+networks:
+  shadownet-network:
+    driver: bridge

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShadowNet Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        .quick-command-btn {
+            margin: 3px;
+            font-size: 0.85rem;
+        }
+        .command-panel {
+            position: sticky;
+            top: 20px;
+        }
+        .agent-selector {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body class="bg-dark text-light">
+
+<div class="container-fluid mt-4">
+
+    <div class="row">
+        <!-- Left Side - Main Content -->
+        <div class="col-lg-8">
+            <h2 class="mb-4">ShadowNet Monitoring Dashboard</h2>
+
+            <div class="card bg-secondary mb-4">
+                <div class="card-body">
+                    <h4>Agents</h4>
+                    <table class="table table-dark table-striped mt-3" id="agentsTable">
+                        <thead>
+                            <tr>
+                                <th>Alias</th>
+                                <th>Status</th>
+                                <th>Risk</th>
+                                <th>Last Seen</th>
+                                <th>Last Task</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-secondary">
+                <div class="card-body">
+                    <h4>Open Incidents</h4>
+                    <table class="table table-dark table-striped mt-3" id="incidentsTable">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Command Panel -->
+        <div class="col-lg-4">
+            <div class="command-panel">
+                <div class="card bg-secondary mb-3">
+                    <div class="card-body">
+                        <h5>Quick Command</h5>
+                        
+                        <!-- Agent Selector -->
+                        <div class="agent-selector">
+                            <label class="form-label">Select Agent:</label>
+                            <select id="agentSelect" class="form-select bg-dark text-light">
+                                <option value="">-- Select Agent --</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Command Input -->
+                        <div class="mb-3">
+                            <label class="form-label">Command:</label>
+                            <input type="text" 
+                                   id="commandInput" 
+                                   class="form-control bg-dark text-light" 
+                                   placeholder="Enter command..."
+                                   disabled>
+                        </div>
+                        
+                        <button id="executeBtn" class="btn btn-primary w-100" disabled>
+                            Execute Command
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Commands -->
+                <div class="card bg-secondary mb-3">
+                    <div class="card-body">
+                        <h6>Favorite Commands</h6>
+                        <div id="quickCommands">
+                            <div class="text-center text-muted">
+                                <small>Loading...</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <a href="/commands" class="btn btn-outline-light btn-sm w-100">
+                            📚 Command Library
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="card bg-secondary">
+                    <div class="card-body">
+                        <h6>Command Status</h6>
+                        <div id="commandStatus" class="text-muted">
+                            <small>No commands executed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+<script>
+// =========================
+// Command Panel Logic
+// =========================
+
+let selectedAgent = null;
+
+// Load favorite commands
+async function loadFavoriteCommands() {
+    try {
+        const response = await fetch('/api/commands/favorites');
+        const commands = await response.json();
+        
+        const container = document.getElementById('quickCommands');
+        
+        if (commands.length === 0) {
+            container.innerHTML = '<small class="text-muted">No favorite commands</small>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        commands.forEach(cmd => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-sm btn-outline-info quick-command-btn';
+            btn.textContent = cmd.name;
+            btn.title = cmd.description;
+            btn.dataset.command = cmd.command;
+            btn.dataset.templateId = cmd.id;
+            
+            btn.addEventListener('click', () => {
+                document.getElementById('commandInput').value = cmd.command;
+                document.getElementById('commandInput').dataset.templateId = cmd.id;
+            });
+            
+            container.appendChild(btn);
+        });
+    } catch (error) {
+        console.error('[ERROR] Loading favorite commands:', error);
+    }
+}
+
+// Populate agent selector
+async function populateAgentSelector() {
+    try {
+        const response = await fetch('/agents');
+        const agents = await response.json();
+        
+        const select = document.getElementById('agentSelect');
+        select.innerHTML = '<option value="">-- Select Agent --</option>';
+        
+        agents.forEach(agent => {
+            const option = document.createElement('option');
+            option.value = agent.alias;
+            option.textContent = `${agent.alias} (${agent.status})`;
+            option.disabled = agent.status !== 'alive' && agent.status !== 'online';
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('[ERROR] Loading agents:', error);
+    }
+}
+
+// Agent selection handler
+document.getElementById('agentSelect').addEventListener('change', function() {
+    selectedAgent = this.value;
+    const commandInput = document.getElementById('commandInput');
+    const executeBtn = document.getElementById('executeBtn');
+    
+    if (selectedAgent) {
+        commandInput.disabled = false;
+        executeBtn.disabled = false;
+    } else {
+        commandInput.disabled = true;
+        executeBtn.disabled = true;
+    }
+});
+
+// Execute command
+document.getElementById('executeBtn').addEventListener('click', async function() {
+    const command = document.getElementById('commandInput').value.trim();
+    const templateId = document.getElementById('commandInput').dataset.templateId || null;
+    
+    if (!selectedAgent) {
+        alert('Please select an agent first');
+        return;
+    }
+    
+    if (!command) {
+        alert('Please enter a command');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                agent_alias: selectedAgent,
+                command: command,
+                template_id: templateId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Success
+            const status = document.getElementById('commandStatus');
+            status.innerHTML = `
+                <div class="alert alert-success p-2 mb-0">
+                    <small>✓ Command sent to ${selectedAgent}</small>
+                </div>
+            `;
+            
+            // Clear command input
+            document.getElementById('commandInput').value = '';
+            delete document.getElementById('commandInput').dataset.templateId;
+            
+            // Refresh agents table
+            loadAgents();
+        } else {
+            throw new Error(result.error || 'Command failed');
+        }
+    } catch (error) {
+        const status = document.getElementById('commandStatus');
+        status.innerHTML = `
+            <div class="alert alert-danger p-2 mb-0">
+                <small>✗ Error: ${error.message}</small>
+            </div>
+        `;
+    }
+});
+
+// Allow Enter key to execute
+document.getElementById('commandInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !this.disabled) {
+        document.getElementById('executeBtn').click();
+    }
+});
+
+// Initialize on load
+document.addEventListener("DOMContentLoaded", () => {
+    loadFavoriteCommands();
+    populateAgentSelector();
+    
+    // Refresh agent selector periodically
+    setInterval(populateAgentSelector, 10000);
+});
+</script>
+
+</body>
+</html>
