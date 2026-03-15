@@ -4,7 +4,7 @@ Thank you to everyone who has contributed to ShadowNet C2! 🎉
 
 ## Project Lead
 
-- **[Your Name]** - *Initial work, core development*
+- **[Divy R Soni]** - *Initial work, core development*
 
 ## Core Contributors
 
